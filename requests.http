@@ -1,0 +1,26 @@
+### Pruebas rápidas (extensión "REST Client" de VS Code)
+@base = http://localhost:3000/api/v1
+
+### 1. Login
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "email": "admin@miapp.com", "password": "123456" }
+
+### 2. Crear cliente (copia el "id" de la respuesta para agendar)
+POST {{base}}/clientes
+Content-Type: application/json
+
+{ "nombre": "Laura", "apellido": "Gómez", "telefono": "3001234567", "email": "laura@mail.com" }
+
+### 3. Listar servicios
+GET {{base}}/servicios
+
+### 4. Agendar cita (reemplaza CLIENTE_ID)
+POST {{base}}/citas
+Content-Type: application/json
+
+{ "clienteId": "CLIENTE_ID", "servicioId": "s-1", "fecha": "2026-10-20", "hora": "10:00", "notas": "primera vez" }
+
+### 5. Listar citas
+GET {{base}}/citas?fecha=2026-10-20
