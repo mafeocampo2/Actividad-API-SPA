@@ -29,3 +29,12 @@ clienteRouter.post("/", async (req, res) => {
     const result = await clienteService.crearCliente(request);
     res.status(201).json(result);
 });
+
+
+// GET /api/v1/clientes
+clienteRouter.get("/", async (req, res) => {
+
+    const clienteService = container.resolve<ClienteService>("clienteService");
+    const result = await clienteService.listarClientes();
+    res.status(200).json(result);
+});

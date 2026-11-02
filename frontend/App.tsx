@@ -1,15 +1,13 @@
 import React from 'react';
-import ExampleScreen from './src/screens/ExampleScreen';
-
-export default function App() {
-  return <ExampleScreen />;
-}
-
-/*import React from "react";
-import { AppNavigator } from "./src/navigation/AppNavigator";
+import { StatusBar } from 'expo-status-bar';
+import { AuthProvider } from './src/context/AuthContext';
+import AppNavigator from './src/navigation/AppNavigator';
 
 export default function App() {
   return (
-        <AppNavigator />
+    <AuthProvider>
+      <AppNavigator />
+      <StatusBar style="light" />
+    </AuthProvider>
   );
-}*/
+}

@@ -54,6 +54,7 @@ El servidor queda en `http://localhost:3000`.
 |---|--------|------|--------------------|-------------|
 | 1 | POST | `/api/v1/auth/login` | Login | Inicia sesión y devuelve token + usuario |
 | 2 | POST | `/api/v1/clientes` | Clientes | Registra un cliente |
+| 2b | GET | `/api/v1/clientes` | Clientes / AgendarCita | Lista los clientes registrados |
 | 3 | GET | `/api/v1/servicios` | Servicio | Lista los servicios disponibles |
 | 4 | POST | `/api/v1/citas` | AgendarCita | Agenda una cita (valida cliente, servicio y cruces de horario) |
 | 5 | GET | `/api/v1/citas` | Citas | Lista las citas (filtros `fecha`, `clienteId`, `estado`) |
