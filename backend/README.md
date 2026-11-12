@@ -54,7 +54,11 @@ El servidor queda en `http://localhost:3000`.
 |---|--------|------|--------------------|-------------|
 | 1 | POST | `/api/v1/auth/login` | Login | Inicia sesión y devuelve token + usuario |
 | 2 | POST | `/api/v1/clientes` | Clientes | Registra un cliente |
-| 2b | GET | `/api/v1/clientes` | Clientes / AgendarCita | Lista los clientes registrados |
+| 2b | GET | `/api/v1/clientes` | Clientes / AgendarCita | Lista los clientes. Opcional `?q=` busca en nombre, teléfono y correo (sin distinguir mayúsculas ni tildes) |
+| 2c | GET | `/api/v1/clientes/:id` | Clientes | Detalle de un cliente (404 si no existe) |
+| 2d | PUT | `/api/v1/clientes/:id` | Clientes | Edita un cliente (409 si el correo ya es de otro cliente) |
+| 2e | DELETE | `/api/v1/clientes/:id` | Clientes | Elimina un cliente (204). 409 `CLIENTE_CON_CITAS_PENDIENTES` si tiene citas PENDIENTE o CONFIRMADA |
+| 2f | GET | `/api/v1/clientes/:id/citas` | Clientes | Historial de citas del cliente, de la más reciente a la más antigua |
 | 3 | GET | `/api/v1/servicios` | Servicio | Lista los servicios disponibles |
 | 4 | POST | `/api/v1/citas` | AgendarCita | Agenda una cita (valida cliente, servicio y cruces de horario) |
 | 5 | GET | `/api/v1/citas` | Citas | Lista las citas (filtros `fecha`, `clienteId`, `estado`) |

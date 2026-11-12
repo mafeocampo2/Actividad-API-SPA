@@ -29,7 +29,22 @@ export const authApi = {
 export const clientesApi = {
   crear: (data: ClienteRequest) => post<Cliente>('/clientes', data),
   listar: () => request<Cliente[]>('/clientes'),
+  // Sin q devuelve todos; el backend ignora mayúsculas y tildes
+  buscar: (q: string) => request<Cliente[]>(`/clientes${query({ q: q.trim() || undefined })}`),
+  obtener: (id: string) => request<Cliente>(`/clientes/${encodeURIComponent(id)}`),
+  actualizar: (id: string, data: ClienteRequest) =>
+    request<Cliente>(`/clientes/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(data) }),
+  // 409 CLIENTE_CON_CITAS_PENDIENTES si tiene citas pendientes
+  eliminar: (id: string) => request<null>(`/clientes/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  // De la más reciente a la más antigua
+  historial: (id: string) => request<Cita[]>(`/clientes/${encodeURIComponent(id)}/citas`),
 };
+
+export const buscarClientes = clientesApi.buscar;
+export const obtenerCliente = clientesApi.obtener;
+export const actualizarCliente = clientesApi.actualizar;
+export const eliminarCliente = clientesApi.eliminar;
+export const historialCliente = clientesApi.historial;
 
 export const serviciosApi = {
   listar: (todos = false) => request<Servicio[]>(`/servicios${query({ todos: todos ? 'true' : undefined })}`),
