@@ -57,6 +57,25 @@ Usuario de prueba para el login: `admin@miapp.com` / `123456`.
 
 El cliente HTTP está en `frontend/src/api/`.
 
+## Generar el APK (Android)
+
+El APK se compila en la nube con **EAS Build** de Expo, sin instalar Android Studio. Ya trae la API de Render configurada (`frontend/eas.json`), así que funciona desde cualquier red.
+
+1. Crea una cuenta gratis en [expo.dev](https://expo.dev).
+2. En la carpeta `frontend/`:
+
+   ```bash
+   npm install
+   npx eas-cli@latest login
+   npm run build:apk
+   ```
+
+3. La primera vez pregunta si crear el proyecto en EAS (**Yes**) y si generar el keystore de Android (**Yes**).
+4. El build tarda unos 10 a 20 minutos. Al terminar muestra un enlace y un código QR para descargar el `.apk`; también queda en expo.dev → tu proyecto → Builds.
+5. En el celular Android, abre el enlace, descarga el APK y permite instalar apps de origen desconocido.
+
+Para cambiar la URL de la API del APK, edita `EXPO_PUBLIC_API_URL` en `frontend/eas.json` y vuelve a generar el build.
+
 ## URL de la API
 
 La app elige la URL sola según dónde corre:
