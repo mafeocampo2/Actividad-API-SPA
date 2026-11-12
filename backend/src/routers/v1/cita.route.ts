@@ -1,5 +1,5 @@
 import { Response, Router } from "express";
-import { CitaCambiosDTO, CitaFiltroDTO, CitaRequestDTO, EstadoCita } from "../../dto/cita.dto";
+import { CitaCambiosDTO, CitaFiltroDTO, CitaRequestDTO, EstadoCierre, EstadoCita } from "../../dto/cita.dto";
 import { container } from "../../config/containers";
 import { CitaError, CitaService } from "../../services/cita.service";
 import { HORA_REGEX, esFechaValida } from "../../utils/fecha";
@@ -43,7 +43,7 @@ citaRouter.post("/", async (req, res) => {
     }
 });
 
-const ESTADOS: EstadoCita[] = ["PENDIENTE", "CONFIRMADA", "CANCELADA", "COMPLETADA"];
+const ESTADOS: EstadoCita[] = ["PENDIENTE", "CONFIRMADA", "CANCELADA", "COMPLETADA", "NO_ASISTIO"];
 
 // GET /api/v1/citas
 // Filtros opcionales: ?fecha=YYYY-MM-DD&clienteId=...&estado=PENDIENTE
@@ -110,6 +110,38 @@ citaRouter.patch("/:id", async (req, res) => {
     try {
         const result = await citaService.reprogramarCita(req.params.id, cambios);
         res.status(200).json(result);
+    } catch (error) {
+        responderError(res, error);
+    }
+});
+
+const ESTADOS_CIERRE: EstadoCierre[] = ["COMPLETADA", "NO_ASISTIO"];
+
+// PATCH /api/v1/citas/:id/estado
+// Body: { estado: "COMPLETADA" | "NO_ASISTIO" }. Solo desde PENDIENTE o CONFIRMADA (409 si no).
+citaRouter.patch("/:id/estado", async (req, res) => {
+
+    const estado = typeof req.body?.estado === "string" ? (req.body.estado.toUpperCase() as EstadoCierre) : undefined;
+    if (!estado || !ESTADOS_CIERRE.includes(estado)) {
+        badRequest(res, `estado must be one of: ${ESTADOS_CIERRE.join(", ")}`);
+        return;
+    }
+
+    const citaService = container.resolve<CitaService>("citaService");
+    try {
+        res.status(200).json(await citaService.cambiarEstado(req.params.id, estado));
+    } catch (error) {
+        responderError(res, error);
+    }
+});
+
+// PATCH /api/v1/citas/:id/cancelar
+// Solo desde PENDIENTE o CONFIRMADA (409 si no). El horario queda libre.
+citaRouter.patch("/:id/cancelar", async (req, res) => {
+
+    const citaService = container.resolve<CitaService>("citaService");
+    try {
+        res.status(200).json(await citaService.cambiarEstado(req.params.id, "CANCELADA"));
     } catch (error) {
         responderError(res, error);
     }

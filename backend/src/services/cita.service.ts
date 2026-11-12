@@ -5,6 +5,7 @@ import {
     CitaRequestDTO,
     CitaResponseDTO,
     DisponibilidadDTO,
+    EstadoCierre,
     SlotDTO
 } from "../dto/cita.dto";
 import { ServicioResponseDTO } from "../dto/servicio.dto";
@@ -94,6 +95,19 @@ export class CitaService implements ICitaService {
         cita.servicioNombre = servicio.nombre;
         cita.duracionMinutos = servicio.duracionMinutos;
         cita.precio = servicio.precio;
+        return cita;
+    }
+
+    /** Cierra una cita: completada, no asistió o cancelada. Solo desde PENDIENTE o CONFIRMADA. */
+    async cambiarEstado(id: string, estado: EstadoCierre): Promise<CitaResponseDTO> {
+        const cita = this.citas.find((c) => c.id === id);
+        if (!cita) {
+            throw new CitaError(404, "NOT_FOUND", "cita not found");
+        }
+        if (!ESTADOS_REPROGRAMABLES.includes(cita.estado)) {
+            throw new CitaError(409, "CITA_NO_MODIFICABLE", `a cita in state ${cita.estado} cannot change its state`);
+        }
+        cita.estado = estado;
         return cita;
     }
 

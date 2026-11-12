@@ -4,6 +4,7 @@ import {
   CitaCambios,
   CitaFiltro,
   Disponibilidad,
+  ReporteResumen,
   CitaRequest,
   Cliente,
   ClienteRequest,
@@ -59,7 +60,17 @@ export const citasApi = {
   // Reagendar: 409 si choca con otra cita
   reprogramar: (id: string, cambios: CitaCambios) =>
     request<Cita>(`/citas/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(cambios) }),
+  // 409 CITA_NO_MODIFICABLE si la cita ya no está pendiente o confirmada
+  cambiarEstado: (id: string, estado: 'COMPLETADA' | 'NO_ASISTIO') =>
+    request<Cita>(`/citas/${encodeURIComponent(id)}/estado`, { method: 'PATCH', body: JSON.stringify({ estado }) }),
+  cancelar: (id: string) => request<Cita>(`/citas/${encodeURIComponent(id)}/cancelar`, { method: 'PATCH' }),
 };
+
+export const reportesApi = {
+  resumen: (desde: string, hasta: string) => request<ReporteResumen>(`/reportes/resumen${query({ desde, hasta })}`),
+};
+
+export const obtenerReporte = reportesApi.resumen;
 
 export const disponibilidadApi = {
   // excluirCitaId: al reagendar, el horario actual de esa cita sale libre

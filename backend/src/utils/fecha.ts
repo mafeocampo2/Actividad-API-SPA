@@ -26,11 +26,14 @@ export const esFechaValida = (fecha: string): boolean => {
     return date.getFullYear() === y && date.getMonth() === m! - 1 && date.getDate() === d;
 };
 
-/** Fecha y hora LOCAL del servidor (no toISOString, que usa UTC) */
+/** "YYYY-MM-DD" con la fecha LOCAL (no toISOString, que usa UTC) */
+export const fechaLocal = (d: Date): string => `${d.getFullYear()}-${dos(d.getMonth() + 1)}-${dos(d.getDate())}`;
+
+/** Fecha y hora LOCAL del servidor */
 export const ahoraLocal = () => {
     const d = new Date();
     return {
-        fecha: `${d.getFullYear()}-${dos(d.getMonth() + 1)}-${dos(d.getDate())}`,
+        fecha: fechaLocal(d),
         hora: `${dos(d.getHours())}:${dos(d.getMinutes())}`
     };
 };
