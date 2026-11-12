@@ -1,0 +1,63 @@
+// Base de datos de la app de citas (SQLite).
+// Cambia el esquema aquí y luego corre: npm run db:migrate -- --name <cambio>
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Usuario {
+  id           String @id
+  nombre       String
+  email        String @unique
+  passwordHash String // scrypt: "salt:hash" en hexadecimal
+  rol          String
+}
+
+model Cliente {
+  id            String  @id // "c-1", "c-2"...
+  nombre        String
+  apellido      String
+  telefono      String
+  email         String  @unique
+  activo        Boolean @default(true)
+  fechaRegistro String // ISO 8601 (UTC)
+}
+
+model Servicio {
+  id              String  @id // "s-1"...
+  nombre          String
+  descripcion     String
+  duracionMinutos Int
+  precio          Int
+  activo          Boolean @default(true)
+}
+
+// Las citas guardan una copia del nombre del cliente, del servicio y del precio
+// para que el historial no cambie si después se edita o elimina el cliente.
+// Por eso clienteId no es una llave foránea: un cliente se puede eliminar
+// cuando sus citas ya están cerradas.
+model Cita {
+  id                String  @id @default(uuid())
+  clienteId         String
+  clienteNombre     String
+  servicioId        String
+  servicioNombre    String
+  fecha             String // YYYY-MM-DD (día local)
+  hora              String // HH:mm
+  horaFin           String // HH:mm
+  duracionMinutos   Int
+  precio            Int
+  estado            String // PENDIENTE | CONFIRMADA | CANCELADA | COMPLETADA | NO_ASISTIO
+  notas             String  @default("")
+  fechaCreacion     String // ISO 8601 (UTC)
+  motivoCancelacion String?
+
+  @@index([fecha])
+  @@index([clienteId])
+}

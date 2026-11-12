@@ -1,4 +1,5 @@
-import { createContainer, asClass, InjectionMode } from "awilix";
+import { createContainer, asClass, asValue, InjectionMode } from "awilix";
+import { prisma } from "./db";
 import { AuthService } from "../services/auth.service";
 import { ClienteService } from "../services/cliente.service";
 import { ServicioService } from "../services/servicio.service";
@@ -11,6 +12,8 @@ export const container = createContainer({
 });
 
 container.register({
+    // Conexión a la base de datos (los servicios la reciben como parámetro "prisma")
+    prisma: asValue(prisma),
     authService: asClass(AuthService).singleton(),
     clienteService: asClass(ClienteService).singleton(),
     servicioService: asClass(ServicioService).singleton(),

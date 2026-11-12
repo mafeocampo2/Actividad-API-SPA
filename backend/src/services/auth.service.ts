@@ -1,25 +1,21 @@
 import { randomUUID } from "node:crypto";
 import { LoginRequestDTO, LoginResponseDTO } from "../dto/auth.dto";
+import { Prisma } from "../config/db";
+import { verificarPassword } from "../utils/password";
 import { IAuthService } from "./interfaces/auth.interface";
-
-// Usuarios de prueba (en memoria, mientras no haya base de datos)
-const usuarios = [
-    { id: "u-1", nombre: "Mafe Ocampo", email: "admin@miapp.com", password: "123456", rol: "admin" }
-];
 
 
 export class AuthService implements IAuthService {
-    constructor() { }
+    // Awilix (modo CLASSIC) inyecta la conexión por el nombre del parámetro
+    constructor(private prisma: Prisma) { }
 
     async login(data: LoginRequestDTO): Promise<LoginResponseDTO | null> {
-        const usuario = usuarios.find(
-            (u) => u.email === data.email.toLowerCase() && u.password === data.password
-        );
-        if (!usuario) {
+        const usuario = await this.prisma.usuario.findUnique({ where: { email: data.email.trim().toLowerCase() } });
+        if (!usuario || !verificarPassword(data.password, usuario.passwordHash)) {
             return null;
         }
 
-        const response: LoginResponseDTO = {
+        return {
             token: randomUUID(),
             usuario: {
                 id: usuario.id,
@@ -28,6 +24,5 @@ export class AuthService implements IAuthService {
                 rol: usuario.rol
             }
         };
-        return response;
     }
 }

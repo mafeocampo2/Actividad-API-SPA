@@ -2,3 +2,8 @@ node_modules/
 dist/
 .env
 *.log
+
+# Base de datos local (SQLite) y cliente generado por Prisma
+backend/prisma/*.db
+backend/prisma/*.db-journal
+backend/src/generated/

@@ -6,47 +6,57 @@ Sigue la misma arquitectura del proyecto base [ExpressTS-API-REST](https://githu
 ## Estructura
 
 ```
+prisma/
+├── schema.prisma              # tablas de la base de datos (SQLite)
+├── migrations/                # historial de cambios del esquema (se sube a git)
+├── seed.ts                    # datos iniciales: usuario admin y servicios
+└── dev.db                     # la base de datos (se crea al instalar; NO se sube a git)
+prisma.config.ts               # configuración de Prisma (ruta de la base, migraciones, seed)
 src/
 ├── config/
-│   └── containers.ts          # contenedor de inyección de dependencias (Awilix)
+│   ├── containers.ts          # contenedor de inyección de dependencias (Awilix)
+│   ├── db.ts                  # conexión a la base de datos (Prisma + SQLite)
+│   └── horario.ts             # horario del salón
 ├── dto/                       # contratos de entrada/salida
-│   ├── auth.dto.ts
-│   ├── cliente.dto.ts
-│   ├── servicio.dto.ts
-│   └── cita.dto.ts
-├── services/                  # lógica de negocio
-│   ├── interfaces/
-│   │   ├── auth.interface.ts
-│   │   ├── cliente.interface.ts
-│   │   ├── servicio.interface.ts
-│   │   └── cita.interface.ts
-│   ├── auth.service.ts
-│   ├── cliente.service.ts
-│   ├── servicio.service.ts
-│   └── cita.service.ts
-├── routers/
-│   └── v1/
-│       ├── index.ts           # monta todas las rutas en /api/v1
-│       ├── auth.route.ts
-│       ├── cliente.route.ts
-│       ├── servicio.route.ts
-│       └── cita.route.ts
+├── services/                  # lógica de negocio (leen y escriben en la base)
+│   └── interfaces/
+├── routers/v1/                # rutas, montadas en /api/v1
+├── utils/                     # fechas y contraseñas
+├── generated/prisma/          # cliente generado por Prisma (NO se sube a git)
 ├── server.ts                  # crea la app de Express
 └── main.ts                    # arranca el servidor en el puerto 3000
 ```
 
 ## Cómo correrlo
 
+La primera vez (o en otro PC):
+
 ```bash
-npm install
-npm run dev        # modo desarrollo (tsx watch)
-# o
-npm run build && npm start
+npm install          # instala dependencias y genera el cliente de Prisma
+npm run db:setup     # crea prisma/dev.db con las tablas y carga el usuario y los servicios
+npm run dev          # modo desarrollo (tsx watch)
 ```
 
-El servidor queda en `http://localhost:3000`.
+En producción: `npm run build && npm start`.
 
-> Los datos se guardan **en memoria** (no hay base de datos todavía), así que se borran al reiniciar el servidor.
+El servidor queda en `http://localhost:3000`. Usuario de prueba: `admin@miapp.com` / `123456`.
+
+## Base de datos
+
+Los datos se guardan en **SQLite** (`prisma/dev.db`) con **Prisma 7**, así que **no se pierden al reiniciar** el servidor.
+
+| Comando | Qué hace |
+|---|---|
+| `npm run db:setup` | Aplica las migraciones y carga los datos iniciales. Seguro de repetir |
+| `npm run db:seed` | Solo carga los datos iniciales (no duplica nada) |
+| `npm run db:migrate -- --name <cambio>` | Después de editar `schema.prisma`: crea y aplica una migración nueva |
+| `npm run db:reset` | **Borra todos los datos** y vuelve a crear la base desde cero |
+| `npm run db:studio` | Abre Prisma Studio para ver y editar los datos en el navegador |
+
+- Por defecto la base es `backend/prisma/dev.db`. Para usar otra, define `DATABASE_URL` (por ejemplo `file:./prisma/otra.db`). Los comandos se corren desde la carpeta `backend/`.
+- Las contraseñas se guardan con **scrypt** (`src/utils/password.ts`), nunca en texto plano.
+- Las citas guardan una copia del nombre del cliente, del servicio y del precio, para que el historial no cambie si después se edita o se elimina el cliente.
+- Para pasar a PostgreSQL más adelante: cambiar `provider` en `schema.prisma`, el adaptador en `src/config/db.ts` y `DATABASE_URL`.
 
 ## Horario del salón
 

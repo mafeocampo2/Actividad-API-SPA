@@ -14,7 +14,10 @@ Los detalles de la API (endpoints, ejemplos) están en [backend/README.md](backe
 
 ```bash
 npm run install:all
+npm run db:setup         # crea la base de datos SQLite del backend (solo la primera vez)
 ```
+
+Los datos se guardan en `backend/prisma/dev.db` y no se pierden al reiniciar. Más detalles en [backend/README.md](backend/README.md#base-de-datos).
 
 ## Correr
 
