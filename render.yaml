@@ -1,4 +1,4 @@
-# Despliegue en Render (Blueprint): crea la API y la base de datos PostgreSQL.
+# Despliegue en Render (Blueprint): crea la API, la app web y la base de datos PostgreSQL.
 # En Render: New → Blueprint → elige este repositorio. Despliega la rama main.
 services:
   - type: web
@@ -20,6 +20,21 @@ services:
         fromDatabase:
           name: mi-app-db
           property: connectionString
+
+  # Versión web de la app (sirve en iPhone, Android y PC desde el navegador)
+  - type: web
+    name: mi-app-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npx expo export --platform web
+    staticPublishPath: dist
+    envVars:
+      - key: EXPO_PUBLIC_API_URL
+        value: https://mi-app-api-63nf.onrender.com/api/v1
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
 
 databases:
   - name: mi-app-db

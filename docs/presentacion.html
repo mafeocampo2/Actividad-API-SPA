@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Agenda del Salón</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: una pila de diapositivas 16:9 con scroll-snap; flechas del teclado pasan de una a otra */
+:root {
+  --bg: #f6f2f5;
+  --slide: #ffffff;
+  --ink: #241a23;
+  --muted: #6d5f6b;
+  --line: #e4dae2;
+  --accent: #8e4a87;
+  --accent-soft: #f3e7f1;
+  --ok: #2f7d5b;
+  --warn: #a8641c;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "DM Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "DM Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #161115; --slide: #211a20; --ink: #f2eaf0; --muted: #b3a4b0; --line: #3a2f38;
+    --accent: #d08cc7; --accent-soft: #3a2537; --ok: #6cc59b; --warn: #e0a463; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #161115; --slide: #211a20; --ink: #f2eaf0; --muted: #b3a4b0; --line: #3a2f38;
+  --accent: #d08cc7; --accent-soft: #3a2537; --ok: #6cc59b; --warn: #e0a463; color-scheme: dark;
+}
+html { scroll-snap-type: y proximity; scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 24px 72px;
+}
+.deck { display: flex; flex-direction: column; align-items: center; gap: 28px; }
+.slide {
+  scroll-snap-align: center; position: relative; width: min(100%, 1080px); aspect-ratio: 16 / 9;
+  background: var(--slide); border: 1px solid var(--line); border-radius: 18px;
+  padding: clamp(24px, 4.5vw, 56px); display: flex; flex-direction: column; gap: 20px; overflow: hidden; min-width: 0;
+}
+.slide > * { min-width: 0; }
+.num { position: absolute; right: 24px; bottom: 18px; font-family: var(--mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+h1, h2 { font-family: var(--display); font-weight: 700; letter-spacing: -0.02em; text-wrap: balance; margin: 0; line-height: 1.08; }
+h1 { font-size: clamp(36px, 6vw, 68px); }
+h2 { font-size: clamp(26px, 3.4vw, 40px); }
+h3 { font-family: var(--display); font-weight: 500; font-size: 19px; margin: 0; }
+p { margin: 0; max-width: 62ch; }
+.lead { font-size: clamp(16px, 1.7vw, 20px); color: var(--muted); }
+code, .mono { font-family: var(--mono); font-size: .9em; }
+
+/* Portada */
+.cover { justify-content: space-between; background: linear-gradient(135deg, var(--accent-soft), var(--slide) 60%); }
+.cover .meta { display: flex; flex-wrap: wrap; gap: 10px 28px; color: var(--muted); font-size: 14px; }
+.cover .meta b { color: var(--ink); font-weight: 600; }
+.ticket { align-self: flex-start; display: inline-flex; gap: 14px; align-items: center; border: 1.5px dashed var(--accent); border-radius: 12px; padding: 10px 16px; font-family: var(--mono); font-size: 14px; }
+.ticket span:first-child { color: var(--accent); font-weight: 500; }
+
+/* Rejillas */
+.grid { display: grid; gap: 14px; flex: 1; align-content: start; }
+.g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.cell { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
+.cell p { font-size: 14px; color: var(--muted); }
+.cell .id { font-family: var(--mono); font-size: 12px; color: var(--accent); }
+.cell.hl { border-color: var(--accent); background: var(--accent-soft); }
+
+/* Arquitectura */
+.arch { flex: 1; display: flex; align-items: center; overflow-x: auto; }
+.arch svg { width: 100%; min-width: 640px; height: auto; }
+.arch .box { fill: var(--slide); stroke: var(--line); stroke-width: 1.5; }
+.arch .box.hl { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; }
+.arch .t { fill: var(--ink); font-family: var(--display); font-size: 17px; font-weight: 500; }
+.arch .s { fill: var(--muted); font-family: var(--body); font-size: 12.5px; }
+.arch .m { fill: var(--accent); font-family: var(--mono); font-size: 11.5px; }
+.arch .wire { stroke: var(--muted); stroke-width: 1.5; fill: none; }
+.arch .dash { stroke-dasharray: 5 4; }
+.arch marker path { fill: var(--muted); }
+
+/* Estados de la cita */
+.states { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.pill { border-radius: 999px; padding: 6px 14px; font-family: var(--mono); font-size: 13px; border: 1.5px solid var(--line); }
+.pill.open { border-color: var(--accent); color: var(--accent); }
+.pill.good { border-color: var(--ok); color: var(--ok); }
+.pill.bad { border-color: var(--warn); color: var(--warn); }
+.arrow { color: var(--muted); }
+
+/* Reglas y listas */
+.rules { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 28px; }
+.rules li { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: start; font-size: 15px; }
+.rules .k { font-family: var(--mono); font-size: 13px; color: var(--accent); padding-top: 2px; }
+.rules b { display: block; font-weight: 600; }
+.rules span { color: var(--muted); font-size: 14px; }
+
+/* Tabla API */
+.table-wrap { overflow-x: auto; flex: 1; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--mono); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+td.m { font-family: var(--mono); font-size: 12px; color: var(--accent); width: 64px; }
+td.r { font-family: var(--mono); font-size: 12.5px; white-space: nowrap; }
+
+/* Despliegue */
+.steps { list-style: none; margin: 0; padding: 0; counter-reset: s; display: flex; flex-direction: column; gap: 10px; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 28px 1fr; gap: 10px; font-size: 15px; }
+.steps li::before { content: counter(s); font-family: var(--mono); font-size: 12px; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: var(--slide); display: grid; place-items: center; }
+.steps span { color: var(--muted); font-size: 14px; }
+.note { font-size: 13px; color: var(--muted); border-left: 3px solid var(--warn); padding-left: 12px; }
+
+/* Barra de navegación */
+.nav {
+  position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  display: flex; gap: 6px; align-items: center; background: var(--slide); border: 1px solid var(--line); border-radius: 999px; padding: 6px;
+}
+.nav button { font: 500 14px var(--body); color: var(--ink); background: transparent; border: 0; border-radius: 999px; width: 34px; height: 34px; cursor: pointer; }
+.nav button:hover { background: var(--accent-soft); }
+.nav button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.nav output { font-family: var(--mono); font-size: 12px; color: var(--muted); min-width: 44px; text-align: center; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 760px) {
+  .slide { aspect-ratio: auto; min-height: 0; }
+  .g3, .g2, .rules { grid-template-columns: minmax(0, 1fr); }
+}
+</style>
+<style>body{margin:0}</style>
+</head>
+<body>
+
+<main class="deck" id="deck">
+
+  <section class="slide cover" aria-label="Portada">
+    <div class="eyebrow">Proyecto · API + app móvil</div>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <h1>Agenda del Salón</h1>
+      <p class="lead">Una app para que el dueño de un salón o spa maneje clientes, servicios y citas sin cruces de horario, y vea cuánto factura.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <div class="ticket"><span>Demo</span><span>admin@miapp.com · 123456</span></div>
+      <div class="meta">
+        <span><b>Frontend</b> Expo + React Native</span>
+        <span><b>Backend</b> Express 5 + TypeScript</span>
+        <span><b>Datos</b> PostgreSQL + Prisma</span>
+        <span><b>Hosting</b> Render</span>
+      </div>
+    </div>
+    <span class="num">01</span>
+  </section>
+
+  <section class="slide" aria-label="El problema">
+    <div class="eyebrow">El problema</div>
+    <h2>La agenda en cuaderno se cruza, se pierde y no dice cuánto se ganó</h2>
+    <div class="grid g3">
+      <div class="cell"><h3>Antes</h3><p>Citas anotadas a mano o en WhatsApp. Dos clientes llegan a la misma hora y nadie sabe qué turnos quedan libres.</p></div>
+      <div class="cell hl"><h3>Con la app</h3><p>El sistema calcula los turnos libres según la duración del servicio y rechaza cualquier cita que se cruce.</p></div>
+      <div class="cell"><h3>Resultado</h3><p>Historial por cliente, cancelaciones con motivo y reportes de ingresos por rango de fechas.</p></div>
+    </div>
+    <span class="num">02</span>
+  </section>
+
+  <section class="slide" aria-label="Casos de uso">
+    <div class="eyebrow">Casos de uso · actor: administrador</div>
+    <h2>Diez casos de uso cubren el día a día del salón</h2>
+    <div class="grid g3">
+      <div class="cell"><span class="id">CU-01</span><h3>Iniciar sesión</h3></div>
+      <div class="cell"><span class="id">CU-02</span><h3>Ver resumen del día</h3></div>
+      <div class="cell"><span class="id">CU-03</span><h3>Gestionar clientes</h3><p>Buscar, crear, editar, borrar, ver ficha</p></div>
+      <div class="cell"><span class="id">CU-04</span><h3>Consultar servicios</h3></div>
+      <div class="cell hl"><span class="id">CU-05 · incluye CU-10</span><h3>Agendar cita</h3><p>Con turnos libres a la vista</p></div>
+      <div class="cell"><span class="id">CU-06 · incluye CU-10</span><h3>Reprogramar cita</h3></div>
+      <div class="cell"><span class="id">CU-07</span><h3>Completar o no asistió</h3></div>
+      <div class="cell"><span class="id">CU-08</span><h3>Cancelar cita</h3><p>Con motivo opcional</p></div>
+      <div class="cell"><span class="id">CU-09</span><h3>Ver reportes</h3><p>Ingresos, estados, servicios top</p></div>
+    </div>
+    <span class="num">03</span>
+  </section>
+
+  <section class="slide" aria-label="Arquitectura del backend">
+    <div class="eyebrow">Arquitectura del backend</div>
+    <h2>Cada petición baja por capas: router, servicio, Prisma, PostgreSQL</h2>
+    <div class="arch">
+      <svg viewBox="0 0 960 300" role="img" aria-label="Diagrama de capas del backend">
+        <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z"/></marker></defs>
+        <rect class="box" x="0" y="40" width="150" height="110" rx="12"/>
+        <text class="t" x="16" y="74">App Expo</text>
+        <text class="s" x="16" y="98">Android, iPhone</text>
+        <text class="s" x="16" y="116">y navegador</text>
+        <text class="m" x="16" y="138">fetch + JSON</text>
+
+        <rect class="box" x="196" y="40" width="160" height="110" rx="12"/>
+        <text class="t" x="212" y="74">Express</text>
+        <text class="s" x="212" y="98">CORS, /health</text>
+        <text class="m" x="212" y="138">server.ts</text>
+
+        <rect class="box" x="402" y="40" width="160" height="110" rx="12"/>
+        <text class="t" x="418" y="74">Routers</text>
+        <text class="s" x="418" y="98">Validan entrada,</text>
+        <text class="s" x="418" y="116">errores {code, message}</text>
+        <text class="m" x="418" y="138">routers/v1</text>
+
+        <rect class="box hl" x="608" y="40" width="160" height="110" rx="12"/>
+        <text class="t" x="624" y="74">Servicios</text>
+        <text class="s" x="624" y="98">Reglas de negocio</text>
+        <text class="s" x="624" y="116">con interfaces</text>
+        <text class="m" x="624" y="138">services/</text>
+
+        <rect class="box" x="814" y="40" width="146" height="110" rx="12"/>
+        <text class="t" x="830" y="74">PostgreSQL</text>
+        <text class="s" x="830" y="98">vía Prisma</text>
+        <text class="s" x="830" y="116">+ adapter-pg</text>
+        <text class="m" x="830" y="138">config/db.ts</text>
+
+        <path class="wire" d="M150 95H194" marker-end="url(#a)"/>
+        <path class="wire" d="M356 95H400" marker-end="url(#a)"/>
+        <path class="wire" d="M562 95H606" marker-end="url(#a)"/>
+        <path class="wire" d="M768 95H812" marker-end="url(#a)"/>
+
+        <rect class="box" x="505" y="210" width="160" height="70" rx="12" style="stroke-dasharray:5 4"/>
+        <text class="t" x="521" y="240">Awilix</text>
+        <text class="m" x="521" y="262">config/containers.ts</text>
+        <path class="wire dash" d="M482 150V245H503" marker-end="url(#a)"/>
+        <path class="wire dash" d="M665 245H688V152" marker-end="url(#a)"/>
+        <text class="s" x="412" y="200">resolve()</text>
+        <text class="s" x="696" y="200">crea e inyecta</text>
+      </svg>
+    </div>
+    <p class="lead" style="font-size:15px">Awilix crea cada servicio una sola vez y le inyecta la conexión a la base. Así cada capa se cambia o se prueba por separado.</p>
+    <span class="num">04</span>
+  </section>
+
+  <section class="slide" aria-label="Modelo de datos">
+    <div class="eyebrow">Modelo de datos</div>
+    <h2>Cuatro tablas, y la cita guarda una copia de lo que costó</h2>
+    <div class="grid g2" style="flex:0">
+      <div class="cell"><h3>Usuario · Cliente · Servicio</h3><p>Contraseñas cifradas con scrypt. El email del cliente es único. Un servicio inactivo no se puede agendar.</p></div>
+      <div class="cell hl"><h3>Cita</h3><p>Guarda nombre del cliente, del servicio y el precio del momento. Si después se edita o borra el cliente, el historial no cambia.</p></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <h3>Ciclo de vida de una cita</h3>
+      <div class="states">
+        <span class="pill open">PENDIENTE</span><span class="arrow">→</span>
+        <span class="pill open">CONFIRMADA</span><span class="arrow">→</span>
+        <span class="pill good">COMPLETADA</span>
+        <span class="pill bad">NO_ASISTIO</span>
+        <span class="pill bad">CANCELADA</span>
+      </div>
+      <p style="font-size:14px;color:var(--muted)">Solo las citas pendientes o confirmadas se pueden reprogramar o cerrar. Las otras tres son estados finales.</p>
+    </div>
+    <span class="num">05</span>
+  </section>
+
+  <section class="slide" aria-label="Reglas de negocio">
+    <div class="eyebrow">Reglas de negocio</div>
+    <h2>El backend hace cumplir seis reglas</h2>
+    <ul class="rules">
+      <li><span class="k">01</span><div><b>Horario</b><span>Lunes a sábado, 08:00 a 18:00, turnos cada 30 min</span></div></li>
+      <li><span class="k">02</span><div><b>Sin cruces</b><span>Dos citas no ocupan el mismo horario (409)</span></div></li>
+      <li><span class="k">03</span><div><b>Hora de Colombia</b><span>Los turnos ya pasados de hoy no se ofrecen</span></div></li>
+      <li><span class="k">04</span><div><b>Estados finales</b><span>Una cita cerrada no se reprograma ni se reabre</span></div></li>
+      <li><span class="k">05</span><div><b>Clientes con citas</b><span>No se borra un cliente con citas pendientes</span></div></li>
+      <li><span class="k">06</span><div><b>Ingresos</b><span>Solo suman las citas completadas</span></div></li>
+    </ul>
+    <span class="num">06</span>
+  </section>
+
+  <section class="slide" aria-label="API REST">
+    <div class="eyebrow">API REST · /api/v1</div>
+    <h2>17 endpoints, un solo formato de error</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Método</th><th>Ruta</th><th>Qué hace</th></tr></thead>
+        <tbody>
+          <tr><td class="m">POST</td><td class="r">/auth/login</td><td>Inicia sesión</td></tr>
+          <tr><td class="m">GET · POST</td><td class="r">/clientes</td><td>Lista (con búsqueda) y registra clientes</td></tr>
+          <tr><td class="m">GET · PUT · DELETE</td><td class="r">/clientes/:id</td><td>Ficha, edición y borrado; <code>/citas</code> da su historial</td></tr>
+          <tr><td class="m">GET</td><td class="r">/servicios</td><td>Catálogo activo</td></tr>
+          <tr><td class="m">GET</td><td class="r">/disponibilidad</td><td>Turnos libres, ocupados, pasados o cerrados</td></tr>
+          <tr><td class="m">GET · POST</td><td class="r">/citas</td><td>Lista con filtros y agenda (409 si se cruza)</td></tr>
+          <tr><td class="m">PATCH</td><td class="r">/citas/:id[/estado|/cancelar]</td><td>Reprograma, cierra o cancela</td></tr>
+          <tr><td class="m">GET</td><td class="r">/dashboard/resumen</td><td>Resumen del día</td></tr>
+          <tr><td class="m">GET</td><td class="r">/reportes/resumen</td><td>Ingresos y estadísticas por rango</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:14px;color:var(--muted)">Todo error responde <code>{ "code": "CONFLICT", "message": "…" }</code> con su código HTTP: 400, 401, 404 o 409.</p>
+    <span class="num">07</span>
+  </section>
+
+  <section class="slide" aria-label="Despliegue">
+    <div class="eyebrow">Despliegue</div>
+    <h2>Un archivo <code style="font-size:.8em">render.yaml</code> levanta API, web y base de datos</h2>
+    <div class="grid g2">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <h3>Render (plan gratis)</h3>
+        <ol class="steps">
+          <li><div>Fusionar el PR a <code>main</code><br><span>Render despliega esa rama</span></div></li>
+          <li><div>New → Blueprint con el repositorio<br><span>Crea mi-app-api, mi-app-web y mi-app-db</span></div></li>
+          <li><div>Al arrancar aplica migraciones y seed<br><span>Comprobar en <code>/health</code></span></div></li>
+        </ol>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <h3>APK Android (EAS Build)</h3>
+        <ol class="steps">
+          <li><div><code>npx eas-cli@latest login</code></div></li>
+          <li><div><code>npm run build:apk</code> en <code>frontend/</code><br><span>Compila en la nube en 10 a 20 min</span></div></li>
+          <li><div>Descargar con el enlace o el QR<br><span>Ya apunta a la API de Render</span></div></li>
+        </ol>
+      </div>
+    </div>
+    <p class="note">Plan gratis: la API se duerme tras 15 min sin uso (abrir /health antes de la demo) y la base vence a los 30 días.</p>
+    <span class="num">08</span>
+  </section>
+
+  <section class="slide" aria-label="Próximos pasos">
+    <div class="eyebrow">Próximos pasos</div>
+    <h2>Lo que sigue para llevarla a producción</h2>
+    <div class="grid g2">
+      <div class="cell hl"><h3>Seguridad</h3><p>Validar el token (JWT) en todas las rutas; hoy solo el login lo emite.</p></div>
+      <div class="cell"><h3>Sesión persistente</h3><p>Mantener la sesión iniciada al recargar la app.</p></div>
+      <div class="cell"><h3>Catálogo editable</h3><p>Crear, editar y activar servicios desde la app.</p></div>
+      <div class="cell"><h3>Recordatorios</h3><p>Avisar al cliente antes de su cita.</p></div>
+    </div>
+    <span class="num">09</span>
+  </section>
+
+</main>
+
+<nav class="nav" aria-label="Navegación de diapositivas">
+  <button id="prev" type="button" aria-label="Diapositiva anterior">↑</button>
+  <output id="pos" aria-live="polite">1 / 9</output>
+  <button id="next" type="button" aria-label="Diapositiva siguiente">↓</button>
+</nav>
+
+<script>
+(function () {
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var pos = document.getElementById('pos');
+  var current = 0;
+  function show(i) {
+    current = Math.max(0, Math.min(slides.length - 1, i));
+    slides[current].scrollIntoView({ block: 'center' });
+  }
+  function update() {
+    var mid = window.innerHeight / 2, best = 0, bestD = Infinity;
+    slides.forEach(function (s, i) {
+      var r = s.getBoundingClientRect(), d = Math.abs(r.top + r.height / 2 - mid);
+      if (d < bestD) { bestD = d; best = i; }
+    });
+    current = best;
+    pos.textContent = (best + 1) + ' / ' + slides.length;
+  }
+  document.getElementById('prev').addEventListener('click', function () { show(current - 1); });
+  document.getElementById('next').addEventListener('click', function () { show(current + 1); });
+  document.addEventListener('keydown', function (e) {
+    if (e.target.closest && e.target.closest('input, textarea')) return;
+    if (['ArrowDown', 'ArrowRight', 'PageDown', ' '].indexOf(e.key) >= 0) { e.preventDefault(); show(current + 1); }
+    if (['ArrowUp', 'ArrowLeft', 'PageUp'].indexOf(e.key) >= 0) { e.preventDefault(); show(current - 1); }
+  });
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+})();
+</script>
+</body>
+</html>
