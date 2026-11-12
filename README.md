@@ -62,7 +62,7 @@ El cliente HTTP está en `frontend/src/api/`.
 El APK se compila en la nube con **EAS Build** de Expo, sin instalar Android Studio. Ya trae la API de Render configurada (`frontend/eas.json`), así que funciona desde cualquier red.
 
 1. Crea una cuenta gratis en [expo.dev](https://expo.dev).
-2. En la raíz del repo (o en `frontend/`):
+2. En la carpeta `frontend/` (el último comando también funciona desde la raíz):
 
    ```bash
    npm install
