@@ -3,6 +3,7 @@ import Feather from '@expo/vector-icons/Feather';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ActivityIndicator,
+  Keyboard,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -357,6 +358,24 @@ export function Avatar({
   );
 }
 
+/**
+ * Alto del teclado en Android (0 si está cerrado). Con edge-to-edge (SDK 58) Android ya no
+ * achica la ventana al abrir el teclado, así que la hoja tiene que dejarle el espacio a mano.
+ */
+function useAltoTecladoAndroid(): number {
+  const [alto, setAlto] = React.useState(0);
+  React.useEffect(() => {
+    if (Platform.OS !== 'android') return;
+    const show = Keyboard.addListener('keyboardDidShow', (e) => setAlto(e.endCoordinates.height));
+    const hide = Keyboard.addListener('keyboardDidHide', () => setAlto(0));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+  return alto;
+}
+
 /** Hoja que sube desde abajo (fondo blanco, radio superior 28). Sin `title`, el contenido trae su propio encabezado. */
 export function BottomSheet({
   visible,
@@ -370,11 +389,14 @@ export function BottomSheet({
   children: React.ReactNode;
 }) {
   const insets = useSafeAreaInsets();
+  const altoTeclado = useAltoTecladoAndroid();
+  // Con el teclado abierto en Android, la hoja deja ese espacio abajo para que los campos queden a la vista
+  const espacioAbajo = altoTeclado > 0 ? altoTeclado + 12 : 22 + insets.bottom;
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Cerrar" />
-        <View style={[styles.sheet, { paddingBottom: 22 + insets.bottom }]}>
+        <View style={[styles.sheet, { paddingBottom: espacioAbajo }]}>
           <View style={[styles.sheetHandle, !title && { marginBottom: 18 }]} />
           {title ? (
             <View style={styles.sheetHeader}>
