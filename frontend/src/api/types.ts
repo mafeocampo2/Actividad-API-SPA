@@ -88,3 +88,27 @@ export interface ResumenDashboard {
   totalClientes: number;
   ingresosHoy: number;
 }
+
+// PATCH /citas/:id (reagendar)
+export interface CitaCambios {
+  fecha?: string;
+  hora?: string;
+  servicioId?: string;
+}
+
+// GET /disponibilidad
+export type MotivoNoDisponible = 'ocupado' | 'pasado' | 'cerrado';
+
+export interface Slot {
+  hora: string; // HH:mm
+  disponible: boolean;
+  motivo?: MotivoNoDisponible;
+}
+
+export interface Disponibilidad {
+  fecha: string;
+  servicioId: string;
+  duracionMin: number;
+  horario: { apertura: string; cierre: string; abierto: boolean };
+  slots: Slot[];
+}

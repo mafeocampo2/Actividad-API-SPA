@@ -5,7 +5,7 @@ export type TabParamList = {
     Inicio: undefined;
     Clientes: undefined;
     Nuevo: undefined; // botón central "+": abre AgendarCita (no tiene pantalla propia)
-    Citas: undefined;
+    Citas: { fecha?: string } | undefined; // fecha: muestra las citas de ese día
     Reportes: undefined;
 };
 
@@ -14,5 +14,6 @@ export type AppStackParamList = {
     Login: undefined;
     Tabs: NavigatorScreenParams<TabParamList>;
     Servicios: undefined;
-    AgendarCita: undefined;
+    // clienteId: cliente preseleccionado · citaId: modo reagendar
+    AgendarCita: { clienteId?: string; citaId?: string } | undefined;
 };
