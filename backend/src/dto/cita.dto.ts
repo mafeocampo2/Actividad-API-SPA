@@ -10,6 +10,13 @@ export interface CitaRequestDTO {
     notas?: string;
 }
 
+// PATCH /citas/:id (reagendar): todos los campos son opcionales
+export interface CitaCambiosDTO {
+    fecha?: string;
+    hora?: string;
+    servicioId?: string;
+}
+
 export interface CitaFiltroDTO {
     fecha?: string;
     clienteId?: string;
@@ -30,4 +37,21 @@ export interface CitaResponseDTO {
     estado: EstadoCita;
     notas: string;
     fechaCreacion: string;
+}
+
+// GET /disponibilidad
+export type MotivoNoDisponible = "ocupado" | "pasado" | "cerrado";
+
+export interface SlotDTO {
+    hora: string; // HH:mm
+    disponible: boolean;
+    motivo?: MotivoNoDisponible;
+}
+
+export interface DisponibilidadDTO {
+    fecha: string;
+    servicioId: string;
+    duracionMin: number;
+    horario: { apertura: string; cierre: string; abierto: boolean };
+    slots: SlotDTO[];
 }

@@ -48,6 +48,10 @@ El servidor queda en `http://localhost:3000`.
 
 > Los datos se guardan **en memoria** (no hay base de datos todavía), así que se borran al reiniciar el servidor.
 
+## Horario del salón
+
+De lunes a sábado, de 08:00 a 18:00, con turnos cada 30 minutos. Se configura en `src/config/horario.ts`. `POST /citas` y `PATCH /citas/:id` rechazan las citas fuera de ese horario (400 `FUERA_DE_HORARIO`).
+
 ## Endpoints
 
 | # | Método | Ruta | Pantalla de la app | Descripción |
@@ -62,7 +66,10 @@ El servidor queda en `http://localhost:3000`.
 | 3 | GET | `/api/v1/servicios` | Servicio | Lista los servicios disponibles |
 | 4 | POST | `/api/v1/citas` | AgendarCita | Agenda una cita (valida cliente, servicio y cruces de horario) |
 | 5 | GET | `/api/v1/citas` | Citas | Lista las citas (filtros `fecha`, `clienteId`, `estado`) |
+| 5b | GET | `/api/v1/citas/:id` | AgendarCita (reagendar) | Detalle de una cita (404 si no existe) |
+| 5c | PATCH | `/api/v1/citas/:id` | AgendarCita (reagendar) | Reagenda: body `{ fecha?, hora?, servicioId? }`. 409 si choca o si la cita no está PENDIENTE/CONFIRMADA; 400 `FUERA_DE_HORARIO` |
 | 6 | GET | `/api/v1/dashboard/resumen` | Inicio | Resumen del día: citas por estado, próxima cita, total de clientes e ingresos (opcionales `fecha`, `hora`) |
+| 7 | GET | `/api/v1/disponibilidad` | AgendarCita | Turnos del día: `?fecha=&servicioId=` (opcional `excluirCitaId`). Cada turno: libre, `ocupado`, `pasado` o `cerrado` |
 
 ### 1. Login
 

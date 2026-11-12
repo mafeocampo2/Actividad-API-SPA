@@ -1,7 +1,9 @@
 import { request } from './client';
 import {
   Cita,
+  CitaCambios,
   CitaFiltro,
+  Disponibilidad,
   CitaRequest,
   Cliente,
   ClienteRequest,
@@ -53,7 +55,21 @@ export const serviciosApi = {
 export const citasApi = {
   agendar: (data: CitaRequest) => post<Cita>('/citas', data),
   listar: (filtro: CitaFiltro = {}) => request<Cita[]>(`/citas${query({ ...filtro })}`),
+  obtener: (id: string) => request<Cita>(`/citas/${encodeURIComponent(id)}`),
+  // Reagendar: 409 si choca con otra cita
+  reprogramar: (id: string, cambios: CitaCambios) =>
+    request<Cita>(`/citas/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(cambios) }),
 };
+
+export const disponibilidadApi = {
+  // excluirCitaId: al reagendar, el horario actual de esa cita sale libre
+  obtener: (fecha: string, servicioId: string, excluirCitaId?: string) =>
+    request<Disponibilidad>(`/disponibilidad${query({ fecha, servicioId, excluirCitaId })}`),
+};
+
+export const obtenerDisponibilidad = disponibilidadApi.obtener;
+export const obtenerCita = citasApi.obtener;
+export const reprogramarCita = citasApi.reprogramar;
 
 export const dashboardApi = {
   // fecha y hora del dispositivo, para que "hoy" sea el día local del usuario

@@ -1,21 +1,9 @@
 import { Router } from "express";
 import { container } from "../../config/containers";
 import { DashboardService } from "../../services/dashboard.service";
+import { FECHA_REGEX, HORA_REGEX, ahoraLocal } from "../../utils/fecha";
 
 export const dashboardRouter = Router();
-
-const FECHA_REGEX = /^\d{4}-\d{2}-\d{2}$/;
-const HORA_REGEX = /^([01]\d|2[0-3]):[0-5]\d$/;
-
-// Fecha y hora LOCAL del servidor (no toISOString, que usa UTC)
-const ahoraLocal = () => {
-    const d = new Date();
-    const dos = (n: number) => String(n).padStart(2, "0");
-    return {
-        fecha: `${d.getFullYear()}-${dos(d.getMonth() + 1)}-${dos(d.getDate())}`,
-        hora: `${dos(d.getHours())}:${dos(d.getMinutes())}`
-    };
-};
 
 // GET /api/v1/dashboard/resumen
 // Opcionales: ?fecha=YYYY-MM-DD&hora=HH:mm (por defecto, la fecha y hora actuales)

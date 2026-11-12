@@ -63,7 +63,7 @@ export default function AppNavigator() {
           <>
             <Stack.Screen name="Tabs" component={Tabs} options={{ headerShown: false }} />
             <Stack.Screen name="Servicios" component={ServiciosScreen} />
-            <Stack.Screen name="AgendarCita" component={AgendarCitaScreen} options={{ title: 'Agendar cita' }} />
+            <Stack.Screen name="AgendarCita" component={AgendarCitaScreen} options={{ headerShown: false }} />
           </>
         ) : (
           <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />

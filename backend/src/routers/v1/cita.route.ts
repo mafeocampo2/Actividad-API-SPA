@@ -1,36 +1,36 @@
-import { Router } from "express";
-import { CitaFiltroDTO, CitaRequestDTO, EstadoCita } from "../../dto/cita.dto";
+import { Response, Router } from "express";
+import { CitaCambiosDTO, CitaFiltroDTO, CitaRequestDTO, EstadoCita } from "../../dto/cita.dto";
 import { container } from "../../config/containers";
 import { CitaError, CitaService } from "../../services/cita.service";
+import { HORA_REGEX, esFechaValida } from "../../utils/fecha";
 
 export const citaRouter = Router();
 
-const FECHA_REGEX = /^\d{4}-\d{2}-\d{2}$/;
-const HORA_REGEX = /^([01]\d|2[0-3]):[0-5]\d$/;
+const badRequest = (res: Response, message: string) => res.status(400).json({ code: "BAD_REQUEST", message });
+
+// Responde los errores de negocio (CitaError) con su código HTTP
+const responderError = (res: Response, error: unknown) => {
+    if (error instanceof CitaError) {
+        res.status(error.status).json({ code: error.code, message: error.message });
+        return;
+    }
+    throw error;
+};
 
 // POST /api/v1/citas
 citaRouter.post("/", async (req, res) => {
 
     const request: CitaRequestDTO = req.body as CitaRequestDTO;
     if (!request?.clienteId || !request?.servicioId || !request?.fecha || !request?.hora) {
-        res.status(400).json({
-            code: "BAD_REQUEST",
-            message: "clienteId, servicioId, fecha and hora are required"
-        });
+        badRequest(res, "clienteId, servicioId, fecha and hora are required");
         return;
     };
-    if (!FECHA_REGEX.test(request.fecha) || Number.isNaN(Date.parse(request.fecha))) {
-        res.status(400).json({
-            code: "BAD_REQUEST",
-            message: "fecha must have the format YYYY-MM-DD"
-        });
+    if (!esFechaValida(request.fecha)) {
+        badRequest(res, "fecha must have the format YYYY-MM-DD");
         return;
     }
     if (!HORA_REGEX.test(request.hora)) {
-        res.status(400).json({
-            code: "BAD_REQUEST",
-            message: "hora must have the format HH:mm"
-        });
+        badRequest(res, "hora must have the format HH:mm");
         return;
     }
 
@@ -39,11 +39,7 @@ citaRouter.post("/", async (req, res) => {
         const result = await citaService.agendarCita(request);
         res.status(201).json(result);
     } catch (error) {
-        if (error instanceof CitaError) {
-            res.status(error.status).json({ code: error.code, message: error.message });
-            return;
-        }
-        throw error;
+        responderError(res, error);
     }
 });
 
@@ -57,11 +53,8 @@ citaRouter.get("/", async (req, res) => {
     const filtro: CitaFiltroDTO = {};
 
     if (typeof fecha === "string") {
-        if (!FECHA_REGEX.test(fecha)) {
-            res.status(400).json({
-                code: "BAD_REQUEST",
-                message: "fecha must have the format YYYY-MM-DD"
-            });
+        if (!esFechaValida(fecha)) {
+            badRequest(res, "fecha must have the format YYYY-MM-DD");
             return;
         }
         filtro.fecha = fecha;
@@ -72,10 +65,7 @@ citaRouter.get("/", async (req, res) => {
     if (typeof estado === "string") {
         const estadoUpper = estado.toUpperCase() as EstadoCita;
         if (!ESTADOS.includes(estadoUpper)) {
-            res.status(400).json({
-                code: "BAD_REQUEST",
-                message: `estado must be one of: ${ESTADOS.join(", ")}`
-            });
+            badRequest(res, `estado must be one of: ${ESTADOS.join(", ")}`);
             return;
         }
         filtro.estado = estadoUpper;
@@ -84,4 +74,43 @@ citaRouter.get("/", async (req, res) => {
     const citaService = container.resolve<CitaService>("citaService");
     const result = await citaService.listarCitas(filtro);
     res.status(200).json(result);
+});
+
+// GET /api/v1/citas/:id
+citaRouter.get("/:id", async (req, res) => {
+
+    const citaService = container.resolve<CitaService>("citaService");
+    const cita = await citaService.obtenerCita(req.params.id);
+    if (!cita) {
+        res.status(404).json({ code: "NOT_FOUND", message: "cita not found" });
+        return;
+    }
+    res.status(200).json(cita);
+});
+
+// PATCH /api/v1/citas/:id  (reagendar)
+// Body: { fecha?, hora?, servicioId? } — al menos uno
+citaRouter.patch("/:id", async (req, res) => {
+
+    const cambios = (req.body ?? {}) as CitaCambiosDTO;
+    if (!cambios.fecha && !cambios.hora && !cambios.servicioId) {
+        badRequest(res, "send at least one of: fecha, hora, servicioId");
+        return;
+    }
+    if (cambios.fecha !== undefined && !esFechaValida(cambios.fecha)) {
+        badRequest(res, "fecha must have the format YYYY-MM-DD");
+        return;
+    }
+    if (cambios.hora !== undefined && !HORA_REGEX.test(cambios.hora)) {
+        badRequest(res, "hora must have the format HH:mm");
+        return;
+    }
+
+    const citaService = container.resolve<CitaService>("citaService");
+    try {
+        const result = await citaService.reprogramarCita(req.params.id, cambios);
+        res.status(200).json(result);
+    } catch (error) {
+        responderError(res, error);
+    }
 });

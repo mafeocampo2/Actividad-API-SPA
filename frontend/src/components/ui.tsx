@@ -149,6 +149,34 @@ export const formatFechaCita = (fecha: string, hora: string) => {
   return `${d.getDate()} ${MESES_CORTOS[d.getMonth()]}${anio} · ${hora12(hora)}`;
 };
 
+const DIAS_CORTOS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+const MESES_LARGOS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+/** "Lun", "Mar"… */
+export const nombreDiaCorto = (date: Date) => DIAS_CORTOS[date.getDay()]!;
+
+/** "Noviembre 2026" */
+export const mesAnio = (date: Date) => `${MESES_LARGOS[date.getMonth()]} ${date.getFullYear()}`;
+
+/** "Mié 11 nov" */
+export const diaCorto = (date: Date) => `${nombreDiaCorto(date)} ${date.getDate()} ${MESES_CORTOS[date.getMonth()]}`;
+
+/** "11 de noviembre" */
+export const diaYMes = (date: Date) => `${date.getDate()} de ${MESES[date.getMonth()]}`;
+
+/** Copia de la fecha con n días sumados (hora local, sin desfase) */
+export const sumarDias = (date: Date, n: number) => new Date(date.getFullYear(), date.getMonth(), date.getDate() + n);
+
+/** Lunes de la semana de esa fecha */
+export const inicioSemana = (date: Date) => sumarDias(date, -((date.getDay() + 6) % 7));
+
+/** "HH:mm" + minutos → "HH:mm" */
+export const sumarMinutos = (hora: string, minutos: number) => {
+  const [h = 0, m = 0] = hora.split(':').map(Number);
+  const total = h * 60 + m + minutos;
+  return `${dos(Math.floor(total / 60) % 24)}:${dos(total % 60)}`;
+};
+
 /** Iniciales de un nombre: "Mafe Ocampo" → "MO" */
 export const iniciales = (nombre = '') =>
   nombre
@@ -377,6 +405,25 @@ export function ConfirmDialog({
   );
 }
 
+/** Aviso de éxito arriba de la pantalla. Va dentro de un contenedor con flex: 1. */
+export function Toast({ titulo, detalle, onClose }: { titulo: string; detalle?: string; onClose: () => void }) {
+  const insets = useSafeAreaInsets();
+  return (
+    <View style={[styles.toast, { top: 12 + insets.top }]} accessibilityRole="alert" accessibilityLiveRegion="polite">
+      <View style={styles.toastIcon}>
+        <Feather name="check" size={18} color={theme.estados.COMPLETADA.fg} />
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={[{ color: '#fff', fontSize: 14 }, font('body', 700)]}>{titulo}</Text>
+        {detalle ? <Text style={[{ color: '#F3D6E3', fontSize: 12, marginTop: 2 }, font('body', 400)]}>{detalle}</Text> : null}
+      </View>
+      <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel="Cerrar aviso" style={styles.iconButton}>
+        <Feather name="x" size={18} color="#F3D6E3" />
+      </Pressable>
+    </View>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Estilos compartidos
 // ---------------------------------------------------------------------------
@@ -574,6 +621,29 @@ export const styles = StyleSheet.create({
     flex: 1,
     minHeight: 48,
     borderRadius: theme.radius.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  toast: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    zIndex: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: theme.colors.text,
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingLeft: 12,
+    paddingRight: 4,
+    boxShadow: theme.shadow,
+  },
+  toastIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: theme.estados.COMPLETADA.bg,
     alignItems: 'center',
     justifyContent: 'center',
   },
