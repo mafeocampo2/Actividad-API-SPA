@@ -65,6 +65,7 @@ export interface Cita {
   estado: EstadoCita;
   notas: string;
   fechaCreacion: string;
+  motivoCancelacion?: string; // solo en citas canceladas, si se indicó
 }
 
 export interface ProximaCita {

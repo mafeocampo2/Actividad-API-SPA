@@ -135,13 +135,27 @@ citaRouter.patch("/:id/estado", async (req, res) => {
     }
 });
 
+const MAX_MOTIVO = 200;
+
 // PATCH /api/v1/citas/:id/cancelar
+// Body opcional: { motivo } (máx. 200 caracteres).
 // Solo desde PENDIENTE o CONFIRMADA (409 si no). El horario queda libre.
 citaRouter.patch("/:id/cancelar", async (req, res) => {
 
+    const motivo = req.body?.motivo;
+    if (motivo !== undefined && motivo !== null && typeof motivo !== "string") {
+        badRequest(res, "motivo must be a string");
+        return;
+    }
+    const motivoLimpio = typeof motivo === "string" ? motivo.trim() : "";
+    if (motivoLimpio.length > MAX_MOTIVO) {
+        badRequest(res, `motivo must have at most ${MAX_MOTIVO} characters`);
+        return;
+    }
+
     const citaService = container.resolve<CitaService>("citaService");
     try {
-        res.status(200).json(await citaService.cambiarEstado(req.params.id, "CANCELADA"));
+        res.status(200).json(await citaService.cambiarEstado(req.params.id, "CANCELADA", motivoLimpio || undefined));
     } catch (error) {
         responderError(res, error);
     }

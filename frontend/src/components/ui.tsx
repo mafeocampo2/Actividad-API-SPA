@@ -162,6 +162,9 @@ export const mesAnio = (date: Date) => `${MESES_LARGOS[date.getMonth()]} ${date.
 /** "Mié 11 nov" */
 export const diaCorto = (date: Date) => `${nombreDiaCorto(date)} ${date.getDate()} ${MESES_CORTOS[date.getMonth()]}`;
 
+/** "Miércoles 11 nov" */
+export const diaMedio = (date: Date) => `${DIAS[date.getDay()]} ${date.getDate()} ${MESES_CORTOS[date.getMonth()]}`;
+
 /** "11 de noviembre" */
 export const diaYMes = (date: Date) => `${date.getDate()} de ${MESES[date.getMonth()]}`;
 
@@ -354,7 +357,7 @@ export function Avatar({
   );
 }
 
-/** Hoja que sube desde abajo (fondo blanco, radio superior 28). */
+/** Hoja que sube desde abajo (fondo blanco, radio superior 28). Sin `title`, el contenido trae su propio encabezado. */
 export function BottomSheet({
   visible,
   title,
@@ -362,7 +365,7 @@ export function BottomSheet({
   children,
 }: {
   visible: boolean;
-  title: string;
+  title?: string;
   onClose: () => void;
   children: React.ReactNode;
 }) {
@@ -372,13 +375,15 @@ export function BottomSheet({
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Cerrar" />
         <View style={[styles.sheet, { paddingBottom: 22 + insets.bottom }]}>
-          <View style={styles.sheetHandle} />
-          <View style={styles.sheetHeader}>
-            <Text style={[styles.sheetTitle, font('display', 700)]}>{title}</Text>
-            <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel="Cerrar" style={styles.iconButton}>
-              <Feather name="x" size={20} color={theme.colors.textSecondary} />
-            </Pressable>
-          </View>
+          <View style={[styles.sheetHandle, !title && { marginBottom: 18 }]} />
+          {title ? (
+            <View style={styles.sheetHeader}>
+              <Text style={[styles.sheetTitle, font('display', 700)]}>{title}</Text>
+              <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel="Cerrar" style={styles.iconButton}>
+                <Feather name="x" size={20} color={theme.colors.textSecondary} />
+              </Pressable>
+            </View>
+          ) : null}
           <ScrollView keyboardShouldPersistTaps="handled">{children}</ScrollView>
         </View>
       </KeyboardAvoidingView>

@@ -99,7 +99,7 @@ export class CitaService implements ICitaService {
     }
 
     /** Cierra una cita: completada, no asistió o cancelada. Solo desde PENDIENTE o CONFIRMADA. */
-    async cambiarEstado(id: string, estado: EstadoCierre): Promise<CitaResponseDTO> {
+    async cambiarEstado(id: string, estado: EstadoCierre, motivoCancelacion?: string): Promise<CitaResponseDTO> {
         const cita = this.citas.find((c) => c.id === id);
         if (!cita) {
             throw new CitaError(404, "NOT_FOUND", "cita not found");
@@ -108,6 +108,9 @@ export class CitaService implements ICitaService {
             throw new CitaError(409, "CITA_NO_MODIFICABLE", `a cita in state ${cita.estado} cannot change its state`);
         }
         cita.estado = estado;
+        if (estado === "CANCELADA" && motivoCancelacion) {
+            cita.motivoCancelacion = motivoCancelacion;
+        }
         return cita;
     }
 

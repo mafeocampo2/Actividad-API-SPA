@@ -40,6 +40,7 @@ export interface CitaResponseDTO {
     estado: EstadoCita;
     notas: string;
     fechaCreacion: string;
+    motivoCancelacion?: string; // solo en citas CANCELADA, si se indicó
 }
 
 // GET /disponibilidad
