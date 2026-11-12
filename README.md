@@ -9,6 +9,7 @@ frontend/   App móvil en Expo / React Native
 
 Cada carpeta tiene su propio `package.json` y su propio `node_modules`.
 Los detalles de la API (endpoints, ejemplos) están en [backend/README.md](backend/README.md).
+La documentación completa (casos de uso, arquitectura, modelo de datos, despliegue) está en [docs/DOCUMENTACION.md](docs/DOCUMENTACION.md), y la presentación en [docs/presentacion.html](docs/presentacion.html).
 
 ## Instalar
 
