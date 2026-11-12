@@ -24,6 +24,10 @@ export class ClienteService implements IClienteService {
         return response;
     }
 
+    async listarClientes(): Promise<ClienteResponseDTO[]> {
+        return this.clientes;
+    }
+
     async buscarPorId(id: string): Promise<ClienteResponseDTO | undefined> {
         return this.clientes.find((c) => c.id === id);
     }
