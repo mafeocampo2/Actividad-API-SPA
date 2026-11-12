@@ -4,24 +4,40 @@
   "description": "API REST en Express + TypeScript para la app de agendamiento de citas (mi-app)",
   "main": "dist/main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsx watch src/main.ts",
-    "build": "tsc",
-    "start": "node dist/main.js"
+    "build": "prisma generate && tsc",
+    "start": "node dist/main.js",
+    "postinstall": "prisma generate",
+    "db:local": "prisma dev --name mi-app --detach",
+    "db:local:stop": "prisma dev stop mi-app",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "prisma db seed",
+    "db:setup": "prisma migrate deploy && prisma db seed",
+    "db:reset": "prisma migrate reset --force",
+    "db:studio": "prisma studio"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "express": "^5.2.1",
+    "@prisma/adapter-pg": "7.10.1",
+    "@prisma/client": "7.10.1",
     "awilix": "^13.0.5",
-    "awilix-express": "^8.0.0"
+    "awilix-express": "^8.0.0",
+    "express": "^5.2.1"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/node": "^26.6.1",
+    "prisma": "7.10.1",
     "tsx": "^4.23.13",
     "typescript": "^7.0.2"
+  },
+  "allowScripts": {
+    "@prisma/engines@7.10.1": true,
+    "prisma@7.10.1": true,
+    "esbuild@0.28.2": true
   }
 }

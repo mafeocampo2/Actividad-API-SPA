@@ -2,3 +2,9 @@ node_modules/
 dist/
 .env
 *.log
+
+# Cliente generado por Prisma
+backend/src/generated/
+
+# Base SQLite antigua (ya no se usa)
+backend/prisma/*.db

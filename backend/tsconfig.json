@@ -24,5 +24,7 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true
-  }
+  },
+  // Solo se compila src/ (prisma.config.ts y prisma/seed.ts los ejecuta Prisma con tsx)
+  "include": ["src"]
 }
