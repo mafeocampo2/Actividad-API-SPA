@@ -44,7 +44,7 @@ function Tabs() {
   return (
     <Tab.Navigator tabBar={(props) => <BottomTabBar {...props} />} screenOptions={header}>
       <Tab.Screen name="Inicio" component={HomeScreen} options={{ headerShown: false }} />
-      <Tab.Screen name="Clientes" component={ClientesScreen} />
+      <Tab.Screen name="Clientes" component={ClientesScreen} options={{ headerShown: false }} />
       <Tab.Screen name="Nuevo" component={Vacio} />
       <Tab.Screen name="Citas" component={CitasScreen} />
       <Tab.Screen name="Reportes" component={ReportesScreen} />

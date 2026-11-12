@@ -1,7 +1,13 @@
 import React from 'react';
+import Feather from '@expo/vector-icons/Feather';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
   Pressable,
+  ScrollView,
   StyleProp,
   StyleSheet,
   Text,
@@ -125,6 +131,24 @@ const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', '
 /** "Miércoles 11 de noviembre" */
 export const fechaLarga = (date: Date) => `${DIAS[date.getDay()]} ${date.getDate()} de ${MESES[date.getMonth()]}`;
 
+const MESES_CORTOS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sept', 'oct', 'nov', 'dic'];
+
+/** Hora de 24 h ("16:00") a 12 h en español ("4:00 p. m."). */
+export const hora12 = (hora: string) => {
+  const [h = 0, m = 0] = hora.split(':').map(Number);
+  const sufijo = h < 12 ? 'a. m.' : 'p. m.';
+  return `${h % 12 || 12}:${dos(m)} ${sufijo}`;
+};
+
+/** Fecha de una cita: "Hoy · 10:30" o "28 oct · 4:00 p. m." (con año si no es el actual). */
+export const formatFechaCita = (fecha: string, hora: string) => {
+  const hoy = new Date();
+  if (fecha === fechaLocalISO(hoy)) return `Hoy · ${hora}`;
+  const d = parseFechaLocal(fecha);
+  const anio = d.getFullYear() !== hoy.getFullYear() ? ` ${d.getFullYear()}` : '';
+  return `${d.getDate()} ${MESES_CORTOS[d.getMonth()]}${anio} · ${hora12(hora)}`;
+};
+
 /** Iniciales de un nombre: "Mafe Ocampo" → "MO" */
 export const iniciales = (nombre = '') =>
   nombre
@@ -236,6 +260,121 @@ export function Circulo({ size, color, style }: { size: number; color: string; s
 /** Bloque rosado suave que ocupa el lugar de un dato mientras carga. */
 export function Skeleton({ width, height, style }: { width: number | `${number}%`; height: number; style?: StyleProp<ViewStyle> }) {
   return <View style={[{ width, height, borderRadius: 8, backgroundColor: theme.colors.pink100 }, style]} />;
+}
+
+const AVATAR_FONDOS = [theme.colors.pink200, theme.colors.lilac100, theme.colors.rose100, theme.colors.pink100];
+
+/** Avatar con iniciales. Sin `color`, el fondo rota según `index`. */
+export function Avatar({
+  nombre,
+  size = 36,
+  radius = 12,
+  index = 0,
+  color,
+}: {
+  nombre: string;
+  size?: number;
+  radius?: number;
+  index?: number;
+  color?: string;
+}) {
+  return (
+    <View
+      style={{
+        width: size,
+        height: size,
+        borderRadius: radius,
+        backgroundColor: color ?? AVATAR_FONDOS[index % AVATAR_FONDOS.length],
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Text style={[{ fontSize: size * 0.34, color: theme.colors.primaryDark }, font('display', 700)]}>{iniciales(nombre)}</Text>
+    </View>
+  );
+}
+
+/** Hoja que sube desde abajo (fondo blanco, radio superior 28). */
+export function BottomSheet({
+  visible,
+  title,
+  onClose,
+  children,
+}: {
+  visible: boolean;
+  title: string;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
+  const insets = useSafeAreaInsets();
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Cerrar" />
+        <View style={[styles.sheet, { paddingBottom: 22 + insets.bottom }]}>
+          <View style={styles.sheetHandle} />
+          <View style={styles.sheetHeader}>
+            <Text style={[styles.sheetTitle, font('display', 700)]}>{title}</Text>
+            <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel="Cerrar" style={styles.iconButton}>
+              <Feather name="x" size={20} color={theme.colors.textSecondary} />
+            </Pressable>
+          </View>
+          <ScrollView keyboardShouldPersistTaps="handled">{children}</ScrollView>
+        </View>
+      </KeyboardAvoidingView>
+    </Modal>
+  );
+}
+
+/** Confirmación propia (Alert.alert no funciona en web). */
+export function ConfirmDialog({
+  visible,
+  title,
+  message,
+  confirmText = 'Confirmar',
+  danger,
+  loading,
+  onConfirm,
+  onCancel,
+}: {
+  visible: boolean;
+  title: string;
+  message: string;
+  confirmText?: string;
+  danger?: boolean;
+  loading?: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  const fondo = danger ? theme.estados.CANCELADA.fg : theme.colors.primary;
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
+      <View style={styles.dialogWrap}>
+        <Pressable style={StyleSheet.absoluteFill} onPress={onCancel} accessibilityLabel="Cancelar" />
+        <View style={styles.dialog} accessibilityRole="alert">
+          <Text style={[styles.dialogTitle, font('display', 700)]}>{title}</Text>
+          <Text style={[styles.dialogText, font('body', 400)]}>{message}</Text>
+          <View style={styles.dialogActions}>
+            <Pressable onPress={onCancel} accessibilityRole="button" style={[styles.dialogButton, styles.dialogCancel]}>
+              <Text style={[{ color: theme.colors.text, fontSize: 15 }, font('body', 600)]}>Cancelar</Text>
+            </Pressable>
+            <Pressable
+              onPress={onConfirm}
+              disabled={loading}
+              accessibilityRole="button"
+              style={[styles.dialogButton, { backgroundColor: fondo }, loading && { opacity: 0.7 }]}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={[{ color: '#fff', fontSize: 15 }, font('body', 700)]}>{confirmText}</Text>
+              )}
+            </Pressable>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -363,5 +502,84 @@ export const styles = StyleSheet.create({
   },
   pillText: {
     fontSize: 11,
+  },
+  iconButton: {
+    width: 44,
+    height: 44,
+    borderRadius: theme.radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(59, 30, 53, 0.35)',
+  },
+  sheet: {
+    maxHeight: '88%',
+    backgroundColor: theme.colors.surface,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: 22,
+    paddingTop: 10,
+  },
+  sheetHandle: {
+    alignSelf: 'center',
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: theme.colors.border,
+    marginBottom: 6,
+  },
+  sheetHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  sheetTitle: {
+    fontSize: 20,
+    color: theme.colors.text,
+  },
+  dialogWrap: {
+    flex: 1,
+    backgroundColor: 'rgba(59, 30, 53, 0.35)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 22,
+  },
+  dialog: {
+    width: '100%',
+    maxWidth: 360,
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.radius.card,
+    padding: 20,
+    gap: 8,
+    boxShadow: theme.shadow,
+  },
+  dialogTitle: {
+    fontSize: 18,
+    color: theme.colors.text,
+  },
+  dialogText: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: theme.colors.textSecondary,
+  },
+  dialogActions: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 10,
+  },
+  dialogButton: {
+    flex: 1,
+    minHeight: 48,
+    borderRadius: theme.radius.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dialogCancel: {
+    backgroundColor: theme.colors.background,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
 });
