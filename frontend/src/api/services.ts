@@ -63,7 +63,12 @@ export const citasApi = {
   // 409 CITA_NO_MODIFICABLE si la cita ya no está pendiente o confirmada
   cambiarEstado: (id: string, estado: 'COMPLETADA' | 'NO_ASISTIO') =>
     request<Cita>(`/citas/${encodeURIComponent(id)}/estado`, { method: 'PATCH', body: JSON.stringify({ estado }) }),
-  cancelar: (id: string) => request<Cita>(`/citas/${encodeURIComponent(id)}/cancelar`, { method: 'PATCH' }),
+  // motivo opcional, máximo 200 caracteres
+  cancelar: (id: string, motivo?: string) =>
+    request<Cita>(`/citas/${encodeURIComponent(id)}/cancelar`, {
+      method: 'PATCH',
+      body: JSON.stringify(motivo?.trim() ? { motivo: motivo.trim() } : {}),
+    }),
 };
 
 export const reportesApi = {
