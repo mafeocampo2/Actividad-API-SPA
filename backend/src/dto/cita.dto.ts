@@ -1,6 +1,9 @@
 //dto de citas (pantallas AgendarCita y Citas)
 
-export type EstadoCita = "PENDIENTE" | "CONFIRMADA" | "CANCELADA" | "COMPLETADA";
+export type EstadoCita = "PENDIENTE" | "CONFIRMADA" | "CANCELADA" | "COMPLETADA" | "NO_ASISTIO";
+
+// Estados a los que se puede cerrar una cita (PATCH /citas/:id/estado y /cancelar)
+export type EstadoCierre = "COMPLETADA" | "NO_ASISTIO" | "CANCELADA";
 
 export interface CitaRequestDTO {
     clienteId: string;

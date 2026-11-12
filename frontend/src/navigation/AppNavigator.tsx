@@ -47,7 +47,7 @@ function Tabs() {
       <Tab.Screen name="Clientes" component={ClientesScreen} options={{ headerShown: false }} />
       <Tab.Screen name="Nuevo" component={Vacio} />
       <Tab.Screen name="Citas" component={CitasScreen} />
-      <Tab.Screen name="Reportes" component={ReportesScreen} />
+      <Tab.Screen name="Reportes" component={ReportesScreen} options={{ headerShown: false }} />
     </Tab.Navigator>
   );
 }

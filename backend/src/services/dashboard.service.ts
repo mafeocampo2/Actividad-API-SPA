@@ -37,7 +37,8 @@ export class DashboardService implements IDashboardService {
                 : null,
             totalClientes: clientes.length,
             // Ingresos esperados del día: todas las citas que no están canceladas
-            ingresosHoy: activas.reduce((total, c) => total + c.precio, 0)
+            // (no cuentan las canceladas ni las de clientes que no asistieron)
+            ingresosHoy: activas.filter((c) => c.estado !== "NO_ASISTIO").reduce((total, c) => total + c.precio, 0)
         };
     }
 }

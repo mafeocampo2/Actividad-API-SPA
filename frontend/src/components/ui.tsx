@@ -50,7 +50,8 @@ export const theme = {
     PENDIENTE: { bg: '#FFF0D6', fg: '#7A4E00', label: 'Pendiente' },
     COMPLETADA: { bg: '#DDF3EA', fg: '#1F6B4E', label: 'Completada' },
     CANCELADA: { bg: '#FDE2E4', fg: '#A12C3A', label: 'Cancelada' },
-    CONFIRMADA: { bg: '#EFE6F5', fg: '#5B3A86', label: 'Confirmada' },
+    CONFIRMADA: { bg: '#E3EEFB', fg: '#2F5B8A', label: 'Confirmada' },
+    NO_ASISTIO: { bg: '#EFE6F5', fg: '#5B3A86', label: 'No asistió' },
   } satisfies Record<EstadoCita, { bg: string; fg: string; label: string }>,
   radius: { sm: 12, md: 14, lg: 16, xl: 20, xxl: 22, card: 26, hero: 28, pill: 999 },
   shadow: '0px 8px 24px rgba(142, 74, 135, 0.16)',
@@ -169,6 +170,37 @@ export const sumarDias = (date: Date, n: number) => new Date(date.getFullYear(),
 
 /** Lunes de la semana de esa fecha */
 export const inicioSemana = (date: Date) => sumarDias(date, -((date.getDay() + 6) % 7));
+
+/** Domingo de la semana de esa fecha */
+export const finSemana = (date: Date) => sumarDias(inicioSemana(date), 6);
+
+/** Primer día del mes */
+export const inicioMes = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1);
+
+/** Último día del mes */
+export const finMes = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
+/**
+ * Rango en texto:
+ * "9 – 15 de noviembre de 2026" · "28 de octubre – 3 de noviembre de 2026" · "29 de diciembre de 2026 – 4 de enero de 2027"
+ */
+export const rangoTexto = (desde: Date, hasta: Date) => {
+  const fin = `${hasta.getDate()} de ${MESES[hasta.getMonth()]} de ${hasta.getFullYear()}`;
+  if (desde.getFullYear() !== hasta.getFullYear()) {
+    return `${desde.getDate()} de ${MESES[desde.getMonth()]} de ${desde.getFullYear()} – ${fin}`;
+  }
+  if (desde.getMonth() !== hasta.getMonth()) {
+    return `${desde.getDate()} de ${MESES[desde.getMonth()]} – ${fin}`;
+  }
+  if (desde.getDate() === hasta.getDate()) return fin;
+  return `${desde.getDate()} – ${fin}`;
+};
+
+/** true si "AAAA-MM-DD" es una fecha real (descarta 2026-02-31) */
+export const esFechaISO = (texto: string) => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(texto)) return false;
+  return fechaLocalISO(parseFechaLocal(texto)) === texto;
+};
 
 /** "HH:mm" + minutos → "HH:mm" */
 export const sumarMinutos = (hora: string, minutos: number) => {

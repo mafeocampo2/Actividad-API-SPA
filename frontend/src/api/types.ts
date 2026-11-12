@@ -1,6 +1,6 @@
 // Tipos que devuelve la API (mismos DTO del backend)
 
-export type EstadoCita = 'PENDIENTE' | 'CONFIRMADA' | 'CANCELADA' | 'COMPLETADA';
+export type EstadoCita = 'PENDIENTE' | 'CONFIRMADA' | 'CANCELADA' | 'COMPLETADA' | 'NO_ASISTIO';
 
 export interface Usuario {
   id: string;
@@ -111,4 +111,22 @@ export interface Disponibilidad {
   duracionMin: number;
   horario: { apertura: string; cierre: string; abierto: boolean };
   slots: Slot[];
+}
+
+// GET /reportes/resumen
+export interface ServicioTop {
+  servicioId: string;
+  nombre: string;
+  cantidad: number;
+}
+
+export interface ReporteResumen {
+  desde: string;
+  hasta: string;
+  totalCitas: number;
+  porEstado: { pendiente: number; completada: number; cancelada: number; no_asistio: number };
+  ingresos: number;
+  clientesNuevos: number;
+  tasaCancelacion: number; // de 0 a 1
+  serviciosTop: ServicioTop[];
 }
