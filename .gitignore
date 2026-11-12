@@ -3,7 +3,8 @@ dist/
 .env
 *.log
 
-# Base de datos local (SQLite) y cliente generado por Prisma
-backend/prisma/*.db
-backend/prisma/*.db-journal
+# Cliente generado por Prisma
 backend/src/generated/
+
+# Base SQLite antigua (ya no se usa)
+backend/prisma/*.db

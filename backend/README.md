@@ -7,15 +7,16 @@ Sigue la misma arquitectura del proyecto base [ExpressTS-API-REST](https://githu
 
 ```
 prisma/
-├── schema.prisma              # tablas de la base de datos (SQLite)
+├── schema.prisma              # tablas de la base de datos (PostgreSQL)
 ├── migrations/                # historial de cambios del esquema (se sube a git)
-├── seed.ts                    # datos iniciales: usuario admin y servicios
-└── dev.db                     # la base de datos (se crea al instalar; NO se sube a git)
-prisma.config.ts               # configuración de Prisma (ruta de la base, migraciones, seed)
+└── seed.ts                    # datos iniciales: usuario admin y servicios
+prisma.config.ts               # configuración de Prisma (migraciones y seed)
+.env.example                   # DATABASE_URL opcional
 src/
 ├── config/
 │   ├── containers.ts          # contenedor de inyección de dependencias (Awilix)
-│   ├── db.ts                  # conexión a la base de datos (Prisma + SQLite)
+│   ├── database-url.ts        # de dónde sale la URL de la base (DATABASE_URL o la local)
+│   ├── db.ts                  # conexión a la base de datos (Prisma + PostgreSQL)
 │   └── horario.ts             # horario del salón
 ├── dto/                       # contratos de entrada/salida
 ├── services/                  # lógica de negocio (leen y escriben en la base)
@@ -33,30 +34,32 @@ La primera vez (o en otro PC):
 
 ```bash
 npm install          # instala dependencias y genera el cliente de Prisma
-npm run db:setup     # crea prisma/dev.db con las tablas y carga el usuario y los servicios
+npm run db:local     # arranca PostgreSQL local (prisma dev); repetir tras reiniciar el PC
+npm run db:setup     # crea las tablas y carga el usuario y los servicios
 npm run dev          # modo desarrollo (tsx watch)
 ```
 
-En producción: `npm run build && npm start`.
+En producción: `npm run build && npm start`. El puerto sale de la variable `PORT` (3000 si no existe).
 
-El servidor queda en `http://localhost:3000`. Usuario de prueba: `admin@miapp.com` / `123456`.
+El servidor queda en `http://localhost:3000` (`GET /health` responde `{ "status": "ok" }`). Usuario de prueba: `admin@miapp.com` / `123456`.
 
 ## Base de datos
 
-Los datos se guardan en **SQLite** (`prisma/dev.db`) con **Prisma 7**, así que **no se pierden al reiniciar** el servidor.
+Los datos se guardan en **PostgreSQL** con **Prisma 7**, así que **no se pierden al reiniciar** el servidor.
 
 | Comando | Qué hace |
 |---|---|
+| `npm run db:local` | Arranca un PostgreSQL local en el puerto 51214 (no hay que instalar Postgres). Se detiene con `npm run db:local:stop` |
 | `npm run db:setup` | Aplica las migraciones y carga los datos iniciales. Seguro de repetir |
 | `npm run db:seed` | Solo carga los datos iniciales (no duplica nada) |
 | `npm run db:migrate -- --name <cambio>` | Después de editar `schema.prisma`: crea y aplica una migración nueva |
 | `npm run db:reset` | **Borra todos los datos** y vuelve a crear la base desde cero |
 | `npm run db:studio` | Abre Prisma Studio para ver y editar los datos en el navegador |
 
-- Por defecto la base es `backend/prisma/dev.db`. Para usar otra, define `DATABASE_URL` (por ejemplo `file:./prisma/otra.db`). Los comandos se corren desde la carpeta `backend/`.
+- Por defecto se usa el PostgreSQL local de `npm run db:local`. Para usar otra base, define `DATABASE_URL` en `backend/.env` (ver `.env.example`). Los comandos se corren desde la carpeta `backend/`.
+- En Render, `DATABASE_URL` la pone [render.yaml](../render.yaml) y al arrancar se corre `npm run db:setup`.
 - Las contraseñas se guardan con **scrypt** (`src/utils/password.ts`), nunca en texto plano.
 - Las citas guardan una copia del nombre del cliente, del servicio y del precio, para que el historial no cambie si después se edita o se elimina el cliente.
-- Para pasar a PostgreSQL más adelante: cambiar `provider` en `schema.prisma`, el adaptador en `src/config/db.ts` y `DATABASE_URL`.
 
 ## Horario del salón
 

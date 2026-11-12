@@ -14,10 +14,22 @@ Los detalles de la API (endpoints, ejemplos) están en [backend/README.md](backe
 
 ```bash
 npm run install:all
-npm run db:setup         # crea la base de datos SQLite del backend (solo la primera vez)
+npm run db:local         # arranca PostgreSQL en tu PC (sin instalar nada más)
+npm run db:setup         # crea las tablas y carga el usuario y los servicios (solo la primera vez)
 ```
 
-Los datos se guardan en `backend/prisma/dev.db` y no se pierden al reiniciar. Más detalles en [backend/README.md](backend/README.md#base-de-datos).
+Los datos se guardan en **PostgreSQL** y no se pierden al reiniciar. Después de reiniciar el PC, vuelve a correr `npm run db:local` antes del backend. Más detalles en [backend/README.md](backend/README.md#base-de-datos).
+
+## Desplegar en Render
+
+El archivo [render.yaml](render.yaml) crea la API y la base de datos PostgreSQL en Render (plan gratis).
+
+1. Fusiona los cambios a `main` (Render despliega esa rama).
+2. En [render.com](https://render.com): **New → Blueprint**, conecta GitHub y elige este repositorio. Render lee `render.yaml` y crea `mi-app-api` y `mi-app-db`.
+3. Cuando termine, la API queda en `https://mi-app-api.onrender.com` (Render puede agregar letras al nombre). Pruébala en `/health`.
+4. En `frontend/.env` pon `EXPO_PUBLIC_API_URL=https://<tu-app>.onrender.com/api/v1` y reinicia Expo. Así el celular funciona desde cualquier red.
+
+En el plan gratis el servidor se duerme tras 15 minutos sin uso, y la primera petición después tarda cerca de un minuto. La base de datos gratis de Render vence a los 30 días: después hay que crear otra (o pasar a un plan pago).
 
 ## Correr
 

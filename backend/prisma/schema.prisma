@@ -1,4 +1,4 @@
-// Base de datos de la app de citas (SQLite).
+// Base de datos de la app de citas (PostgreSQL).
 // Cambia el esquema aquí y luego corre: npm run db:migrate -- --name <cambio>
 
 generator client {
@@ -8,7 +8,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 model Usuario {

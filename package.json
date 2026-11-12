@@ -11,6 +11,7 @@
     "android": "npm run android --prefix frontend",
     "ios": "npm run ios --prefix frontend",
     "web": "npm run web --prefix frontend",
+    "db:local": "npm run db:local --prefix backend",
     "db:setup": "npm run db:setup --prefix backend",
     "db:reset": "npm run db:reset --prefix backend"
   }

@@ -46,7 +46,7 @@ export class ClienteService implements IClienteService {
         if (!texto) {
             return todos;
         }
-        // SQLite no ignora tildes al comparar, así que el filtro se hace aquí
+        // La base no ignora tildes al comparar, así que el filtro se hace aquí
         const soloDigitos = texto.replace(/\s/g, "");
         return todos.filter((c) =>
             normalizar(c.nombreCompleto).includes(texto) ||

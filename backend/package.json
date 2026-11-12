@@ -8,6 +8,8 @@
     "build": "prisma generate && tsc",
     "start": "node dist/main.js",
     "postinstall": "prisma generate",
+    "db:local": "prisma dev --name mi-app --detach",
+    "db:local:stop": "prisma dev stop mi-app",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
@@ -20,7 +22,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@prisma/adapter-better-sqlite3": "7.10.1",
+    "@prisma/adapter-pg": "7.10.1",
     "@prisma/client": "7.10.1",
     "awilix": "^13.0.5",
     "awilix-express": "^8.0.0",
@@ -34,7 +36,6 @@
     "typescript": "^7.0.2"
   },
   "allowScripts": {
-    "better-sqlite3@12.11.1": true,
     "@prisma/engines@7.10.1": true,
     "prisma@7.10.1": true,
     "esbuild@0.28.2": true

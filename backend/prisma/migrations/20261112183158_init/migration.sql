@@ -1,36 +1,42 @@
 -- CreateTable
 CREATE TABLE "Usuario" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "nombre" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "passwordHash" TEXT NOT NULL,
-    "rol" TEXT NOT NULL
+    "rol" TEXT NOT NULL,
+
+    CONSTRAINT "Usuario_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Cliente" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "nombre" TEXT NOT NULL,
     "apellido" TEXT NOT NULL,
     "telefono" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "activo" BOOLEAN NOT NULL DEFAULT true,
-    "fechaRegistro" TEXT NOT NULL
+    "fechaRegistro" TEXT NOT NULL,
+
+    CONSTRAINT "Cliente_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Servicio" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "nombre" TEXT NOT NULL,
     "descripcion" TEXT NOT NULL,
     "duracionMinutos" INTEGER NOT NULL,
     "precio" INTEGER NOT NULL,
-    "activo" BOOLEAN NOT NULL DEFAULT true
+    "activo" BOOLEAN NOT NULL DEFAULT true,
+
+    CONSTRAINT "Servicio_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Cita" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "clienteId" TEXT NOT NULL,
     "clienteNombre" TEXT NOT NULL,
     "servicioId" TEXT NOT NULL,
@@ -43,7 +49,9 @@ CREATE TABLE "Cita" (
     "estado" TEXT NOT NULL,
     "notas" TEXT NOT NULL DEFAULT '',
     "fechaCreacion" TEXT NOT NULL,
-    "motivoCancelacion" TEXT
+    "motivoCancelacion" TEXT,
+
+    CONSTRAINT "Cita_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex

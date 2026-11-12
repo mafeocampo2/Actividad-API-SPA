@@ -19,6 +19,11 @@ export const createserver = () => {
         next();
     });
 
+    // Para que Render sepa que el servidor está vivo
+    app.get("/health", (_req, res) => {
+        res.json({ status: "ok" });
+    });
+
     // Todas las rutas de la versión 1 quedan bajo /api/v1
     app.use("/api/v1", routerV1);
 
