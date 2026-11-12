@@ -2,25 +2,141 @@ import React from 'react';
 import {
   ActivityIndicator,
   Pressable,
+  StyleProp,
   StyleSheet,
   Text,
   TextInput,
   TextInputProps,
+  TextStyle,
   View,
+  ViewStyle,
 } from 'react-native';
+import { EstadoCita } from '../api/types';
 
-export const colors = {
-  primary: '#8e4a87',
-  primaryLight: '#f3e6f2',
-  background: '#fff',
-  text: '#333',
-  muted: '#666',
-  border: '#ddd',
-  error: '#c0392b',
-  success: '#1e8449',
+// ---------------------------------------------------------------------------
+// Tema
+// ---------------------------------------------------------------------------
+
+export const theme = {
+  colors: {
+    background: '#FFF4F7',
+    surface: '#FFFFFF',
+    border: '#F3CFDC',
+    borderSoft: '#F6D9E4',
+    borderNuevo: '#EBA8C1',
+    pink50: '#FCE4EC',
+    pink100: '#F9DCE8',
+    lilac100: '#F6E1F1',
+    rose100: '#FFE4E6',
+    pink200: '#F8C8D8',
+    pink300: '#F4B6CB',
+    pink150: '#FAD6E2',
+    pinkSoft: '#FBEAF0',
+    primary: '#8e4a87',
+    primaryDark: '#6d3768',
+    primaryDeep: '#5E2C58',
+    text: '#3B1E35',
+    textSecondary: '#7A5C70',
+    white: '#FFFFFF',
+  },
+  // Fondo / texto de cada estado de cita
+  estados: {
+    PENDIENTE: { bg: '#FFF0D6', fg: '#7A4E00', label: 'Pendiente' },
+    COMPLETADA: { bg: '#DDF3EA', fg: '#1F6B4E', label: 'Completada' },
+    CANCELADA: { bg: '#FDE2E4', fg: '#A12C3A', label: 'Cancelada' },
+    CONFIRMADA: { bg: '#EFE6F5', fg: '#5B3A86', label: 'Confirmada' },
+  } satisfies Record<EstadoCita, { bg: string; fg: string; label: string }>,
+  radius: { sm: 12, md: 14, lg: 16, xl: 20, xxl: 22, card: 26, hero: 28, pill: 999 },
+  shadow: '0px 8px 24px rgba(142, 74, 135, 0.16)',
+  shadowStrong: '0px 10px 22px rgba(142, 74, 135, 0.35)',
+  touch: 44,
 };
 
+// Colores anteriores: se mantienen para no romper las pantallas que aún los usan
+export const colors = {
+  primary: theme.colors.primary,
+  primaryLight: theme.colors.pink50,
+  background: theme.colors.background,
+  text: theme.colors.text,
+  muted: theme.colors.textSecondary,
+  border: theme.colors.border,
+  error: theme.estados.CANCELADA.fg,
+  success: theme.estados.COMPLETADA.fg,
+};
+
+// ---------------------------------------------------------------------------
+// Tipografía
+// ---------------------------------------------------------------------------
+
+// App.tsx lo marca en true cuando las fuentes de Google cargan bien.
+// Si fallan, se usa la fuente del sistema con el mismo peso.
+let fuentesDisponibles = false;
+export const setFuentesDisponibles = (ok: boolean) => {
+  fuentesDisponibles = ok;
+};
+
+const FAMILIAS = {
+  display: { 600: 'BricolageGrotesque_600SemiBold', 700: 'BricolageGrotesque_700Bold', 800: 'BricolageGrotesque_800ExtraBold' },
+  body: { 400: 'DMSans_400Regular', 500: 'DMSans_500Medium', 600: 'DMSans_600SemiBold', 700: 'DMSans_700Bold' },
+} as const;
+
+type Peso<F extends keyof typeof FAMILIAS> = keyof (typeof FAMILIAS)[F];
+
+/** Estilo de fuente: `display` (Bricolage) para títulos y números, `body` (DM Sans) para texto. */
+export function font<F extends keyof typeof FAMILIAS>(familia: F, peso: Peso<F>): TextStyle {
+  if (fuentesDisponibles) {
+    return { fontFamily: (FAMILIAS[familia] as Record<string, string>)[String(peso)] };
+  }
+  return { fontWeight: String(peso) as TextStyle['fontWeight'] };
+}
+
+// ---------------------------------------------------------------------------
+// Utilidades
+// ---------------------------------------------------------------------------
+
 export const formatPrecio = (precio: number) => `$${precio.toLocaleString('es-CO')}`;
+
+/** Precio abreviado: 70000 → "$70k", 1250000 → "$1,3M". */
+export const formatPrecioCorto = (precio: number) => {
+  const abreviar = (n: number) => n.toLocaleString('es-CO', { maximumFractionDigits: 1 });
+  if (Math.abs(precio) >= 1_000_000) return `$${abreviar(precio / 1_000_000)}M`;
+  if (Math.abs(precio) >= 1_000) return `$${abreviar(precio / 1_000)}k`;
+  return formatPrecio(precio);
+};
+
+const dos = (n: number) => String(n).padStart(2, '0');
+
+/**
+ * AAAA-MM-DD con la fecha LOCAL del dispositivo.
+ * No usar toISOString: trabaja en UTC y en Colombia (UTC-5) puede dar el día siguiente.
+ */
+export const fechaLocalISO = (date: Date = new Date()) =>
+  `${date.getFullYear()}-${dos(date.getMonth() + 1)}-${dos(date.getDate())}`;
+
+/** Convierte "AAAA-MM-DD" en un Date local (sin desfase por zona horaria). */
+export const parseFechaLocal = (fecha: string) => {
+  const [y, m, d] = fecha.split('-').map(Number);
+  return new Date(y ?? 1970, (m ?? 1) - 1, d ?? 1);
+};
+
+const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+
+/** "Miércoles 11 de noviembre" */
+export const fechaLarga = (date: Date) => `${DIAS[date.getDay()]} ${date.getDate()} de ${MESES[date.getMonth()]}`;
+
+/** Iniciales de un nombre: "Mafe Ocampo" → "MO" */
+export const iniciales = (nombre = '') =>
+  nombre
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase())
+    .join('') || '?';
+
+// ---------------------------------------------------------------------------
+// Componentes
+// ---------------------------------------------------------------------------
 
 interface FieldProps extends TextInputProps {
   label: string;
@@ -29,10 +145,10 @@ interface FieldProps extends TextInputProps {
 export function Field({ label, style, ...props }: FieldProps) {
   return (
     <View style={styles.field}>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.label, font('body', 600)]}>{label}</Text>
       <TextInput
-        style={[styles.input, style]}
-        placeholderTextColor="#999"
+        style={[styles.input, font('body', 400), style]}
+        placeholderTextColor="#B497A9"
         autoCapitalize="none"
         {...props}
       />
@@ -53,16 +169,17 @@ export function AppButton({ title, onPress, loading, variant = 'primary' }: Butt
     <Pressable
       onPress={onPress}
       disabled={loading}
+      accessibilityRole="button"
       style={({ pressed }) => [
         styles.button,
         outline && styles.buttonOutline,
-        (pressed || loading) && { opacity: 0.7 },
+        (pressed || loading) && { opacity: 0.75 },
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={outline ? colors.primary : '#fff'} />
+        <ActivityIndicator color={outline ? theme.colors.primary : '#fff'} />
       ) : (
-        <Text style={[styles.buttonText, outline && { color: colors.primary }]}>{title}</Text>
+        <Text style={[styles.buttonText, font('body', 700), outline && { color: theme.colors.primary }]}>{title}</Text>
       )}
     </Pressable>
   );
@@ -70,10 +187,11 @@ export function AppButton({ title, onPress, loading, variant = 'primary' }: Butt
 
 export function Message({ text, type = 'error' }: { text: string | null; type?: 'error' | 'success' }) {
   if (!text) return null;
+  const c = type === 'error' ? theme.estados.CANCELADA : theme.estados.COMPLETADA;
   return (
-    <Text style={[styles.message, { color: type === 'error' ? colors.error : colors.success }]}>
-      {text}
-    </Text>
+    <View style={[styles.message, { backgroundColor: c.bg }]}>
+      <Text style={[styles.messageText, font('body', 500), { color: c.fg }]}>{text}</Text>
+    </View>
   );
 }
 
@@ -85,28 +203,62 @@ interface ChipProps {
 
 export function Chip({ label, selected, onPress }: ChipProps) {
   return (
-    <Pressable onPress={onPress} style={[styles.chip, selected && styles.chipSelected]}>
-      <Text style={[styles.chipText, selected && { color: '#fff' }]}>{label}</Text>
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      style={[styles.chip, selected && styles.chipSelected]}
+    >
+      <Text style={[styles.chipText, font('body', selected ? 700 : 500), selected && { color: '#fff' }]}>{label}</Text>
     </Pressable>
   );
 }
 
+export function EstadoPill({ estado }: { estado: EstadoCita }) {
+  const e = theme.estados[estado];
+  return (
+    <View style={[styles.pill, { backgroundColor: e.bg }]}>
+      <Text style={[styles.pillText, font('body', 700), { color: e.fg }]}>{e.label}</Text>
+    </View>
+  );
+}
+
+/** Círculo decorativo de color sólido. El contenedor debe tener overflow: 'hidden'. */
+export function Circulo({ size, color, style }: { size: number; color: string; style?: StyleProp<ViewStyle> }) {
+  return (
+    <View
+      pointerEvents="none"
+      style={[{ position: 'absolute', width: size, height: size, borderRadius: size / 2, backgroundColor: color }, style]}
+    />
+  );
+}
+
+/** Bloque rosado suave que ocupa el lugar de un dato mientras carga. */
+export function Skeleton({ width, height, style }: { width: number | `${number}%`; height: number; style?: StyleProp<ViewStyle> }) {
+  return <View style={[{ width, height, borderRadius: 8, backgroundColor: theme.colors.pink100 }, style]} />;
+}
+
+// ---------------------------------------------------------------------------
+// Estilos compartidos
+// ---------------------------------------------------------------------------
+
 export const styles = StyleSheet.create({
   screen: {
     flexGrow: 1,
-    backgroundColor: colors.background,
+    backgroundColor: theme.colors.background,
     padding: 20,
+    paddingBottom: 48, // el botón "+" de la barra sobresale por encima
   },
   title: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: colors.text,
+    color: theme.colors.text,
     marginBottom: 16,
   },
   subtitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: colors.text,
+    color: theme.colors.text,
     marginTop: 24,
     marginBottom: 8,
   },
@@ -114,59 +266,70 @@ export const styles = StyleSheet.create({
     marginBottom: 12,
   },
   label: {
-    fontSize: 14,
-    color: colors.muted,
-    marginBottom: 4,
+    fontSize: 13,
+    color: theme.colors.textSecondary,
+    marginBottom: 6,
   },
   input: {
+    minHeight: 48,
+    backgroundColor: theme.colors.surface,
     borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    paddingHorizontal: 12,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    paddingHorizontal: 14,
     paddingVertical: 10,
     fontSize: 16,
-    color: colors.text,
+    color: theme.colors.text,
   },
   button: {
-    backgroundColor: colors.primary,
-    borderRadius: 8,
-    paddingVertical: 14,
+    minHeight: 48,
+    backgroundColor: theme.colors.primary,
+    borderRadius: theme.radius.lg,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 8,
   },
   buttonOutline: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: colors.primary,
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1.5,
+    borderColor: theme.colors.primary,
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: 'bold',
   },
   message: {
-    fontSize: 14,
+    borderRadius: theme.radius.sm,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     marginVertical: 8,
   },
+  messageText: {
+    fontSize: 14,
+  },
   card: {
-    backgroundColor: colors.primaryLight,
-    borderRadius: 10,
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1,
+    borderColor: theme.colors.borderSoft,
+    borderRadius: theme.radius.xl,
     padding: 14,
     marginBottom: 10,
   },
   cardTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: colors.text,
+    color: theme.colors.text,
     marginBottom: 4,
   },
   cardText: {
     fontSize: 14,
-    color: colors.muted,
+    color: theme.colors.textSecondary,
   },
   empty: {
     fontSize: 14,
-    color: colors.muted,
+    color: theme.colors.textSecondary,
     fontStyle: 'italic',
   },
   chips: {
@@ -176,17 +339,29 @@ export const styles = StyleSheet.create({
     marginBottom: 12,
   },
   chip: {
+    minHeight: theme.touch,
+    justifyContent: 'center',
+    backgroundColor: theme.colors.surface,
     borderWidth: 1,
-    borderColor: colors.primary,
-    borderRadius: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.pill,
+    paddingHorizontal: 14,
   },
   chipSelected: {
-    backgroundColor: colors.primary,
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
   },
   chipText: {
-    color: colors.primary,
+    color: theme.colors.text,
     fontSize: 14,
+  },
+  pill: {
+    alignSelf: 'flex-start',
+    borderRadius: theme.radius.pill,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+  },
+  pillText: {
+    fontSize: 11,
   },
 });

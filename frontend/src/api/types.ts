@@ -66,3 +66,25 @@ export interface Cita {
   notas: string;
   fechaCreacion: string;
 }
+
+export interface ProximaCita {
+  id: string;
+  hora: string;
+  cliente: string;
+  servicio: string;
+}
+
+// GET /dashboard/resumen
+export interface ResumenDashboard {
+  fecha: string; // YYYY-MM-DD
+  citasHoy: {
+    total: number;
+    pendiente: number;
+    confirmada: number;
+    completada: number;
+    cancelada: number;
+  };
+  proximaCita: ProximaCita | null;
+  totalClientes: number;
+  ingresosHoy: number;
+}

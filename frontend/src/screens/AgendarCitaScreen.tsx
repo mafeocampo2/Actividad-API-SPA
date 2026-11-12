@@ -69,7 +69,7 @@ export default function AgendarCitaScreen({ navigation }: Props) {
       {clientes.length === 0 ? (
         <>
           <Text style={styles.empty}>No hay clientes. Registra uno primero.</Text>
-          <AppButton title="Ir a Clientes" onPress={() => navigation.navigate('Clientes')} variant="outline" />
+          <AppButton title="Ir a Clientes" onPress={() => navigation.navigate('Tabs', { screen: 'Clientes' })} variant="outline" />
         </>
       ) : (
         <View style={styles.chips}>
@@ -98,7 +98,7 @@ export default function AgendarCitaScreen({ navigation }: Props) {
       <Message text={error} />
       <Message text={exito} type="success" />
       <AppButton title="Agendar" onPress={agendar} loading={loading} />
-      <AppButton title="Ver citas" onPress={() => navigation.navigate('Citas')} variant="outline" />
+      <AppButton title="Ver citas" onPress={() => navigation.navigate('Tabs', { screen: 'Citas' })} variant="outline" />
     </ScrollView>
   );
 }

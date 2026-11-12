@@ -58,6 +58,7 @@ El servidor queda en `http://localhost:3000`.
 | 3 | GET | `/api/v1/servicios` | Servicio | Lista los servicios disponibles |
 | 4 | POST | `/api/v1/citas` | AgendarCita | Agenda una cita (valida cliente, servicio y cruces de horario) |
 | 5 | GET | `/api/v1/citas` | Citas | Lista las citas (filtros `fecha`, `clienteId`, `estado`) |
+| 6 | GET | `/api/v1/dashboard/resumen` | Inicio | Resumen del día: citas por estado, próxima cita, total de clientes e ingresos (opcionales `fecha`, `hora`) |
 
 ### 1. Login
 

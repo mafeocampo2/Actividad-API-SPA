@@ -6,6 +6,7 @@ import {
   Cliente,
   ClienteRequest,
   LoginResponse,
+  ResumenDashboard,
   Servicio,
 } from './types';
 
@@ -38,3 +39,11 @@ export const citasApi = {
   agendar: (data: CitaRequest) => post<Cita>('/citas', data),
   listar: (filtro: CitaFiltro = {}) => request<Cita[]>(`/citas${query({ ...filtro })}`),
 };
+
+export const dashboardApi = {
+  // fecha y hora del dispositivo, para que "hoy" sea el día local del usuario
+  resumen: (fecha?: string, hora?: string) =>
+    request<ResumenDashboard>(`/dashboard/resumen${query({ fecha, hora })}`),
+};
+
+export const obtenerResumenDashboard = dashboardApi.resumen;
